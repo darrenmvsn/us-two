@@ -1,0 +1,61 @@
+# Us Two on the shared Oracle Cloud VM, beside Viralab. Run from this folder;
+# deploy.sh is the normal entry. Ported from DesignLoop's kit.
+#
+# This stack owns no Postgres and no Caddy. It joins Viralab's compose network
+# (`viralab_default`) and reaches Viralab's `postgres` service there, where
+# create-db.sh made Us Two its own database and role. Viralab's Caddy reaches
+# this app as `ustwo:3000` on the same network. Service names are DNS names on
+# that network, so none may reuse a Viralab service name (`app`, `migrate`,
+# `postgres`, `caddy`).
+name: ustwo
+
+x-database-url: &database_url
+  # connection_limit: the Postgres server is shared, so this app's pool is pinned.
+  DATABASE_URL: postgresql://ustwo:${USTWO_DB_PASSWORD:?set USTWO_DB_PASSWORD in .env}@postgres:5432/ustwo?connection_limit=5
+
+services:
+  # `prisma migrate deploy`: applies committed migrations only. deploy.sh runs
+  # it before restarting the app, so a failing migration stops the rollout
+  # with the old container still serving.
+  ustwo-migrate:
+    image: ustwo-tools:latest
+    build:
+      context: ../..
+      dockerfile: deploy/oracle/Dockerfile
+      target: tools
+    environment:
+      <<: *database_url
+    networks: [viralab]
+    cpus: 0.5
+    mem_limit: 512m
+    restart: "no"
+
+  ustwo:
+    image: ustwo-app:latest
+    build:
+      context: ../..
+      dockerfile: deploy/oracle/Dockerfile
+      target: runner
+    env_file: .env
+    environment:
+      <<: *database_url
+      # Keeps the V8 heap under the container's 512 MB with room for buffers.
+      NODE_OPTIONS: --max-old-space-size=384
+    networks: [viralab]
+    # Not published: only Caddy reaches it, over the shared network.
+    expose: ["3000"]
+    cpus: 0.5
+    mem_limit: 512m
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/health').then(r=>process.exit(r.ok?0:1),()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      start_period: 30s
+      retries: 3
+    stop_grace_period: 30s
+
+networks:
+  viralab:
+    external: true
+    name: ${VIRALAB_NETWORK:-viralab_default}

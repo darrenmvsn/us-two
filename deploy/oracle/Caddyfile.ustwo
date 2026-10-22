@@ -1,0 +1,15 @@
+# Us Two's site block for Viralab's Caddy (one Caddy serves every app on the
+# VM). caddy-site.sh writes it, with the domain filled in, to the sites folder
+# Viralab's Caddyfile imports, then validates and reloads Caddy.
+{$USTWO_DOMAIN} {
+	reverse_proxy ustwo:3000 {
+		# The API's per-client limits key on the leftmost X-Forwarded-For
+		# entry (src/lib/http/rate-limit.ts). Overwrite it with the address
+		# Caddy resolved from CF-Connecting-IP, so a client cannot pick its
+		# own bucket. Needs Cloudflare in Viralab's trusted_proxies.
+		header_up X-Forwarded-For {client_ip}
+		header_up X-Real-IP {client_ip}
+		header_up X-Forwarded-Host {host}
+		header_up X-Forwarded-Proto {scheme}
+	}
+}

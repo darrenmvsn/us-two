@@ -1,0 +1,107 @@
+// Us Two: two people, one question a day, answers shown once both have answered.
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// A pair playing together. No accounts: each person is a Player on one phone,
+/// known by a random token in an HttpOnly cookie (only its hash is stored).
+model Couple {
+  id         String   @id @default(cuid())
+  /// The link the starter sends their partner; dead once the second seat is taken.
+  inviteCode String   @unique
+  /// IANA zone from the starter's browser. "Today" and streak days are counted in it.
+  timeZone   String
+  /// The pack the next question comes from (src/lib/questions/packs.ts).
+  packId     String   @default("everyday")
+  createdAt  DateTime @default(now())
+  players    Player[]
+  rounds     Round[]
+  duels      Duel[]
+}
+
+model Player {
+  id        String   @id @default(cuid())
+  coupleId  String
+  couple    Couple   @relation(fields: [coupleId], references: [id], onDelete: Cascade)
+  /// 0 started the game, 1 joined by the link.
+  seat      Int
+  name      String
+  /// sha256 of the cookie token, hex.
+  tokenHash String   @unique
+  createdAt DateTime @default(now())
+  answers   Answer[]
+  duelPicks DuelPicks[]
+
+  @@unique([coupleId, seat])
+}
+
+/// One question put to a couple. Revealed when both players have an Answer:
+/// that is derived on read, never stored, so two answers landing together
+/// cannot leave a round stuck.
+model Round {
+  id         String   @id @default(cuid())
+  coupleId   String
+  couple     Couple   @relation(fields: [coupleId], references: [id], onDelete: Cascade)
+  /// 1, 2, 3… in the order the couple got them.
+  number     Int
+  /// A catalog id (src/lib/questions). Ids are never reused for another question.
+  questionId String
+  /// The couple-local date the round opened (YYYY-MM-DD).
+  dayKey     String
+  openedAt   DateTime @default(now())
+  answers    Answer[]
+
+  @@unique([coupleId, number])
+  @@unique([coupleId, questionId])
+}
+
+model Answer {
+  id        String   @id @default(cuid())
+  roundId   String
+  round     Round    @relation(fields: [roundId], references: [id], onDelete: Cascade)
+  playerId  String
+  player    Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  /// Pick questions: the option this player chose for themselves.
+  choice    Int?
+  /// Pick questions: the option they guessed their partner chose.
+  guess     Int?
+  /// Open questions: what they wrote.
+  text      String?
+  createdAt DateTime @default(now())
+
+  @@unique([roundId, playerId])
+  @@index([playerId])
+}
+
+/// A This or that round: ten two-way picks from one set, played any time.
+/// Revealed (the match score) once both players have sent their picks.
+model Duel {
+  id        String      @id @default(cuid())
+  coupleId  String
+  couple    Couple      @relation(fields: [coupleId], references: [id], onDelete: Cascade)
+  /// A set id (src/lib/this-or-that/sets.ts). Ids are never reused.
+  setId     String
+  startedAt DateTime    @default(now())
+  picks     DuelPicks[]
+
+  @@index([coupleId, startedAt])
+}
+
+/// One player's picks for a Duel, sent whole: 0 or 1 per item, in the set's order.
+model DuelPicks {
+  id        String   @id @default(cuid())
+  duelId    String
+  duel      Duel     @relation(fields: [duelId], references: [id], onDelete: Cascade)
+  playerId  String
+  player    Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  choices   Int[]
+  createdAt DateTime @default(now())
+
+  @@unique([duelId, playerId])
+  @@index([playerId])
+}

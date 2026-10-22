@@ -1,0 +1,6 @@
+# Game
+
+- **2026-10-22** Never open the next round on a page load once the day has one: the first build opened question 2 the moment both had answered, so the reveal (the payoff) was replaced before anyone saw it. Page loads open only a couple's first round or the first of a new day; extras open on "Next question". Evidence: `src/lib/couple/game.ts::openRoundIfDue`. Tags: `game`
+- **2026-10-22** "Who is funnier? Me / Sam" means opposite people on the two phones, so store picks in seat 0's frame and swap `ME`/`PARTNER` for seat 1; comparing raw indexes scored every agreement as a mismatch. Evidence: `src/lib/questions/perspective.ts`. Tags: `game`
+- **2026-10-22** Derive "revealed" from the two answers on every read instead of stamping it: two answers committed at once each miss the other's insert, and a stored flag would leave the round stuck. Evidence: `src/lib/couple/views.ts::buildRoundView`. Tags: `game`, `postgres`
+- **2026-10-22** Pass `now` into every write a schedule reads (`createdAt` of a couple, an answer): the streak test failed because answers took the database clock while the test asked about another day. Evidence: `src/lib/couple/game.ts::submitAnswer`. Tags: `tests`
