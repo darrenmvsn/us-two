@@ -173,6 +173,13 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Phone-first: no double-tap zoom on controls, no text selection on tap targets. */
+button,
+a,
+[role="radio"] {
+  touch-action: manipulation;
+}
+
 ::selection {
   background: var(--accent-ring);
 }
@@ -252,6 +259,45 @@ body {
   transform: scale(0.96);
 }
 
+/* Full width and a little taller on phones, where the thumb is; normal from 640px. */
+.btn-block {
+  width: 100%;
+  height: 52px;
+  font-size: var(--text-lead);
+}
+
+@media (min-width: 640px) {
+  .btn-block {
+    width: auto;
+    height: 44px;
+    font-size: var(--text-body);
+    align-self: flex-start;
+  }
+}
+
+/*
+ * A form's main action pinned just above the phone tab bar while the form
+ * is on screen, so it is always under the thumb. In the page flow from 768px.
+ */
+.thumb-bar {
+  position: sticky;
+  bottom: calc(64px + env(safe-area-inset-bottom));
+  z-index: 5;
+  margin: 0 -20px -20px;
+  padding: 12px 20px 20px;
+  background: var(--surface);
+  border-radius: 0 0 var(--radius-panel) var(--radius-panel);
+}
+
+@media (min-width: 768px) {
+  .thumb-bar {
+    position: static;
+    margin: 0;
+    padding: 0;
+    background: none;
+  }
+}
+
 .btn-sm {
   height: 36px;
   padding: 0 14px;
@@ -264,8 +310,10 @@ body {
   box-shadow: inset 0 -3px 0 var(--accent-hover);
 }
 
+@media (hover: hover) {
 .btn-primary:hover {
   background: var(--accent-hover);
+}
 }
 
 .btn-outline {
@@ -274,16 +322,20 @@ body {
   border: 1px solid var(--edge);
 }
 
+@media (hover: hover) {
 .btn-outline:hover {
   border-color: var(--edge-strong);
+}
 }
 
 .btn-ghost {
   color: var(--secondary);
 }
 
+@media (hover: hover) {
 .btn-ghost:hover {
   background: var(--surface-raised);
+}
 }
 
 .btn:disabled {
@@ -329,6 +381,8 @@ body {
 
 /* A choice in a question: a full-width row, rose when picked, with a heart that fills. */
 .option {
+  -webkit-user-select: none;
+  user-select: none;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -345,8 +399,10 @@ body {
   transition: border-color 120ms ease, background-color 120ms ease, transform 160ms ease;
 }
 
+@media (hover: hover) {
 .option:hover {
   border-color: var(--edge-strong);
+}
 }
 
 .option:active:not(:disabled) {
@@ -374,6 +430,8 @@ body {
 
 /* A big tinted tile: a This or that side, a set to play. */
 .tile {
+  -webkit-user-select: none;
+  user-select: none;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -420,8 +478,10 @@ body {
   font-weight: 600;
 }
 
+@media (hover: hover) {
 .link:hover {
   text-decoration: underline;
+}
 }
 
 /* Left-hand tabs on wide screens; the same links sit in the phone tab bar. */
@@ -438,9 +498,11 @@ body {
   width: 100%;
 }
 
+@media (hover: hover) {
 .side-tab:hover {
   color: var(--foreground);
   background: var(--surface-raised);
+}
 }
 
 .side-tab[aria-current="page"] {

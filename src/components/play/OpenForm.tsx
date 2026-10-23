@@ -33,10 +33,12 @@ export function OpenForm({ partnerName, busy, onSubmit }: { partnerName: string;
           {text.length}/{MAX}
         </p>
       </div>
-      <button type="submit" className="btn btn-primary self-start" disabled={busy || !text.trim()}>
-        <Heart className="size-4" aria-hidden="true" />
-        {busy ? 'Sending…' : 'Lock it in'}
-      </button>
+      <div className="thumb-bar">
+        <button type="submit" className="btn btn-primary btn-block" disabled={busy || !text.trim()}>
+          <Heart className="size-4" aria-hidden="true" />
+          {busy ? 'Sending…' : 'Lock it in'}
+        </button>
+      </div>
     </form>
   );
 }

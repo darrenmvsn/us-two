@@ -40,10 +40,12 @@ export function PickForm({
           <OptionGroup label={`What will ${partnerName} pick?`} who="them" name={partnerName} options={options} value={guess} onChange={setGuess} />
         </div>
       ) : null}
-      <button type="submit" className="btn btn-primary self-start" disabled={busy || choice === null || guess === null}>
-        <Heart className="size-4" aria-hidden="true" />
-        {busy ? 'Sending…' : 'Lock it in'}
-      </button>
+      <div className="thumb-bar">
+        <button type="submit" className="btn btn-primary btn-block" disabled={busy || choice === null || guess === null}>
+          <Heart className="size-4" aria-hidden="true" />
+          {busy ? 'Sending…' : choice === null ? 'Pick your answer' : guess === null ? `Now guess ${partnerName}'s` : 'Lock it in'}
+        </button>
+      </div>
     </form>
   );
 }

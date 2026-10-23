@@ -11,7 +11,8 @@ export default async function GameLayout({ children }: { children: React.ReactNo
   const partner = ctx.couple.players.find((p) => p.id !== ctx.player.id);
   return (
     <>
-      <header className="max-w-[1080px] w-full mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+      <header className="sticky top-0 z-10 bg-background pt-[env(safe-area-inset-top)]">
+        <div className="max-w-[1080px] w-full mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
         <Wordmark href="/us" />
         <span className="flex items-center gap-2 min-w-0">
           <span className="text-caption text-muted truncate hidden sm:inline">
@@ -19,6 +20,7 @@ export default async function GameLayout({ children }: { children: React.ReactNo
           </span>
           <CouplePair you={ctx.player.name} them={partner?.name ?? null} size="sm" beating={Boolean(partner)} />
         </span>
+        </div>
       </header>
       <div className="flex-1 w-full max-w-[1080px] mx-auto px-4 sm:px-6 pb-28 md:pb-12 flex gap-10">
         <SideNav />

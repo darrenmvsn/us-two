@@ -184,7 +184,7 @@ function NextUp({ home, onOpen }: { home: HomeView; onOpen: () => void }) {
       return (
         <div className="p-5 flex flex-wrap items-center justify-between gap-3">
           <p className="text-secondary">Your first day comes with a few extra questions.</p>
-          <button type="button" className="btn btn-primary" onClick={onOpen}>
+          <button type="button" className="btn btn-primary btn-block" onClick={onOpen}>
             <Heart className="size-4" aria-hidden="true" /> Next question
           </button>
         </div>
@@ -195,7 +195,7 @@ function NextUp({ home, onOpen }: { home: HomeView; onOpen: () => void }) {
           <p className="text-secondary">
             Next question in <span className="num">{hoursFrom(home.next.inMs)}</span>.
           </p>
-          <Link href="/us/this-or-that" className="btn btn-outline">
+          <Link href="/us/this-or-that" className="btn btn-outline btn-block">
             Play This or that
           </Link>
         </div>

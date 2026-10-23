@@ -48,7 +48,7 @@ export function NameForm({ inviteCode, cta }: { inviteCode?: string; cta: string
           required
           aria-describedby={error ? `${id}-error` : undefined}
         />
-        <button type="submit" className="btn btn-primary shrink-0" disabled={busy || !name.trim()}>
+        <button type="submit" className="btn btn-primary btn-block shrink-0" disabled={busy || !name.trim()}>
           {busy ? 'One moment…' : cta}
         </button>
       </div>

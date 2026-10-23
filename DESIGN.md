@@ -26,15 +26,20 @@ Viralab, DesignLoop and Moatlab:
 3. **Tints are decoration.** The six `--tint-*` colours fill art, set and pack
    tiles and chips. They never mean "selected" or "matched", and text on them
    is `foreground`.
-4. **Thumb-sized.** Buttons, inputs and tabs are 44 px (36 px small), options
+4. **Phone first.** Us Two is played on phones; design at 390 px (and check
+   360 px) before anything wider. Main actions are full width and pinned
+   within thumb reach (`.btn-block`, `.thumb-bar`); This or that picks by tap
+   or by swiping towards a side; hover styles only apply on devices that
+   hover; headers respect the notch (`env(safe-area-inset-top)`).
+5. **Thumb-sized.** Buttons, inputs and tabs are 44 px (36 px small), options
    48 px. One primary (rose) button per region.
-5. **Navigation**: left-hand tabs (`.side-tab`) on wide screens; on phones
+6. **Navigation**: left-hand tabs (`.side-tab`) on wide screens; on phones
    the same links in one bar at the bottom (`.tab-bar-item`). Never a second
    bar under the header. No native dropdown pickers: choices are `.option`
    rows.
-6. **Plain words.** Sentence case, no jargon, no operator copy. Say what
+7. **Plain words.** Sentence case, no jargon, no operator copy. Say what
    happens ("They'll see it once they've answered too"), not how it works.
-7. **Motion is a reward, and optional.** Answers flip in at a reveal, a match
+8. **Motion is a reward, and optional.** Answers flip in at a reveal, a match
    bursts hearts (canvas-confetti, once per reveal), picks pop, the streak
    flame beats. Every `.anim-*` class and the burst switch off under
    `prefers-reduced-motion`. A pick also buzzes once on phones that allow it.
@@ -103,6 +108,8 @@ applies.
 | `.anim-rise` / `-pop` / `-flip` / `-float` / `-beat` / `-wiggle` / `-drift` / `-slide-in` / `-bob` / `-picked` | Motion; stagger with `--delay` |
 | `.divide-rows` | Hairlines between sections or rows inside a panel |
 | `.btn` + `.btn-primary` / `.btn-outline` / `.btn-ghost`, `.btn-sm` | Buttons: pills that sink a little when pressed |
+| `.btn-block` | A screen's main action: full width and 52 px on phones, normal from 640 px |
+| `.thumb-bar` | Wraps a form's main action so it stays pinned above the phone tab bar while the form is on screen |
 | `.input`, `.textarea` | Text fields, 16 px type |
 | `.option` | A choice: `role="radio"` + `aria-checked`, or a toggle with `aria-pressed` |
 | `.chip`, `.chip-match` | Small labels: the streak, "Matched" |

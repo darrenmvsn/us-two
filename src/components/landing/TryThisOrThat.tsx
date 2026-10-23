@@ -4,6 +4,7 @@ import { Heart, RotateCcw } from 'lucide-react';
 import { useState } from 'react';
 import { Avatar } from '@/components/art/Avatar';
 import { tap } from '@/lib/client/haptics';
+import { useSwipe } from '@/lib/client/use-swipe';
 
 /** Three pairs and what "Sam" picked: a taste of This or that before signing up. Nothing is sent anywhere. */
 const PAIRS: readonly { pair: readonly [string, string]; theirs: 0 | 1 }[] = [
@@ -19,6 +20,11 @@ export function TryThisOrThat() {
   const done = picks.length === PAIRS.length;
   const matched = picks.filter((p, i) => p === PAIRS[i]!.theirs).length;
   const current = PAIRS[Math.min(picks.length, PAIRS.length - 1)]!;
+  const choose = (side: 0 | 1) => {
+    tap();
+    setPicks((before) => (before.length < PAIRS.length ? [...before, side] : before));
+  };
+  const swipe = useSwipe(choose, !done);
 
   return (
     <div className="panel p-5 flex flex-col gap-4 w-full max-w-[420px]" aria-live="polite">
@@ -43,20 +49,23 @@ export function TryThisOrThat() {
           </button>
         </div>
       ) : (
-        <div key={picks.length} className="grid grid-cols-2 gap-3 anim-slide-in">
+        <div key={picks.length} className="anim-slide-in">
+        <div
+          className="grid grid-cols-2 gap-3 touch-pan-y"
+          style={{ transform: `translateX(${swipe.dx * 0.5}px) rotate(${swipe.dx / 40}deg)`, transition: swipe.dx === 0 ? 'transform 220ms ease' : 'none' }}
+          {...swipe.bind}
+        >
           {current.pair.map((label, i) => (
             <button
               key={label}
               type="button"
               className={`tile ${i === 0 ? 'bg-tint-blush' : 'bg-tint-lilac'} min-h-[110px] text-lead font-semibold`}
-              onClick={() => {
-                tap();
-                setPicks([...picks, i as 0 | 1]);
-              }}
+              onClick={() => choose(i as 0 | 1)}
             >
               {label}
             </button>
           ))}
+        </div>
         </div>
       )}
 

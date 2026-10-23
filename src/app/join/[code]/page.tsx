@@ -27,8 +27,10 @@ export default async function JoinPage({ params }: PageProps<'/join/[code]'>) {
 
   return (
     <>
-      <header className="max-w-[1080px] w-full mx-auto px-4 sm:px-6 h-16 flex items-center">
+      <header className="pt-[env(safe-area-inset-top)]">
+        <div className="max-w-[1080px] w-full mx-auto px-4 sm:px-6 h-16 flex items-center">
         <Wordmark />
+        </div>
       </header>
       <main className="flex-1 w-full max-w-[1080px] mx-auto px-4 sm:px-6 grid lg:grid-cols-2 gap-10 items-center py-10 lg:py-20">
         <div className="flex flex-col gap-6">
@@ -61,7 +63,7 @@ export default async function JoinPage({ params }: PageProps<'/join/[code]'>) {
                 {info.kind === 'taken' ? 'Someone has already joined with this link.' : 'This link has expired.'}
               </h1>
               <p className="text-lead text-secondary">Ask your partner for a new link, or start your own game.</p>
-              <Link href="/" className="btn btn-primary self-start">
+              <Link href="/" className="btn btn-primary btn-block">
                 Start your own
               </Link>
             </>

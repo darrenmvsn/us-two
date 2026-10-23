@@ -8,8 +8,10 @@ export const metadata: Metadata = { title: 'Privacy' };
 export default function PrivacyPage() {
   return (
     <>
-      <header className="max-w-[1080px] w-full mx-auto px-4 sm:px-6 h-16 flex items-center">
+      <header className="pt-[env(safe-area-inset-top)]">
+        <div className="max-w-[1080px] w-full mx-auto px-4 sm:px-6 h-16 flex items-center">
         <Wordmark />
+        </div>
       </header>
       <main className="flex-1 w-full max-w-[680px] mx-auto px-4 sm:px-6 py-10 flex flex-col gap-4 text-secondary">
         <h1 className="text-display display text-foreground">Privacy</h1>

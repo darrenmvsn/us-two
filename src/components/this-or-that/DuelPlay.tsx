@@ -7,6 +7,8 @@ import type { DuelView } from '@/lib/this-or-that/duels';
 import { callApi } from '@/lib/client/api';
 import { tap } from '@/lib/client/haptics';
 import { usePoll } from '@/lib/client/use-poll';
+import { useSwipe } from '@/lib/client/use-swipe';
+import { SWIPE_PX } from '@/lib/client/swipe';
 import { APP_NAME } from '@/lib/brand';
 import { Avatar } from '@/components/art/Avatar';
 import { CountUp } from '@/components/art/CountUp';
@@ -74,6 +76,10 @@ export function DuelPlay({ initial, myName, partnerName }: { initial: DuelView; 
     return () => window.removeEventListener('keydown', onKey);
   }, [duel.state, pick]);
 
+  const swipe = useSwipe(pick, duel.state === 'play' && flash === null && !busy);
+  // While dragging, the side the card is heading for grows and the other fades.
+  const leaning: 0 | 1 | null = swipe.dx <= -SWIPE_PX / 3 ? 0 : swipe.dx >= SWIPE_PX / 3 ? 1 : null;
+
   const theme = setTheme(duel.set.id);
   const SetIcon = theme.icon;
 
@@ -125,14 +131,19 @@ export function DuelPlay({ initial, myName, partnerName }: { initial: DuelView; 
       <h1 id="pair" className="sr-only">
         {left} or {right}?
       </h1>
-      <div key={index} className="relative grid grid-cols-2 gap-3 anim-slide-in">
+      <div key={index} className="anim-slide-in">
+      <div
+        className="relative grid grid-cols-2 gap-3 touch-pan-y select-none"
+        style={{ transform: `translateX(${swipe.dx * 0.5}px) rotate(${swipe.dx / 40}deg)`, transition: swipe.dx === 0 ? 'transform 220ms ease' : 'none' }}
+        {...swipe.bind}
+      >
         {[left, right].map((label, i) => {
           const side = i as 0 | 1;
           return (
             <button
               key={label}
               type="button"
-              className={`tile ${TINT_BG[theme.tint]} min-h-[200px] sm:min-h-[240px] text-heading display ${flash === side ? 'anim-picked ring-4 ring-accent' : ''} ${flash !== null && flash !== side ? 'opacity-50' : ''}`}
+              className={`tile ${TINT_BG[theme.tint]} min-h-[38dvh] sm:min-h-[240px] text-heading display transition-[opacity,scale] ${flash === side ? 'anim-picked ring-4 ring-accent' : ''} ${leaning === side ? 'scale-105 ring-4 ring-accent' : ''} ${(flash !== null && flash !== side) || (leaning !== null && leaning !== side) ? 'opacity-50' : ''}`}
               disabled={busy}
               onClick={() => pick(side)}
             >
@@ -148,11 +159,19 @@ export function DuelPlay({ initial, myName, partnerName }: { initial: DuelView; 
           or
         </span>
       </div>
+      </div>
       <div className="flex items-center justify-between gap-3">
         <button type="button" className="btn btn-ghost btn-sm" disabled={picks.length === 0 || busy || flash !== null} onClick={() => setPicks(picks.slice(0, -1))}>
           <ArrowLeft className="size-4" aria-hidden="true" /> Back
         </button>
-        {busy ? <p className="text-caption text-muted">Sending…</p> : <p className="text-caption text-muted hidden sm:block">Tip: arrow keys pick a side</p>}
+        {busy ? (
+          <p className="text-caption text-muted">Sending…</p>
+        ) : (
+          <p className="text-caption text-muted">
+            <span className="md:hidden">Tap one, or swipe towards it</span>
+            <span className="hidden md:inline">Click one, or use the arrow keys</span>
+          </p>
+        )}
       </div>
       {error ? (
         <p role="alert" className="text-caption text-accent-text">
@@ -218,7 +237,7 @@ function DuelResult({ duel, myName, partnerName }: { duel: DuelView; myName: str
           );
         })}
       </ol>
-      <Link href="/us/this-or-that" className="btn btn-primary self-start">
+      <Link href="/us/this-or-that" className="btn btn-primary btn-block">
         Play another set
       </Link>
     </div>

@@ -32,8 +32,8 @@ export function ShareLink({ path, text, label, primary = false }: { path: string
   }
 
   return (
-    <div className="flex flex-col gap-2">
-      <button type="button" onClick={share} className={`btn ${primary ? 'btn-primary' : 'btn-outline'} self-start`}>
+    <div className="flex flex-col gap-2 w-full sm:w-auto">
+      <button type="button" onClick={share} className={`btn ${primary ? 'btn-primary' : 'btn-outline'} btn-block`}>
         {copied ? <Check className="size-4" aria-hidden="true" /> : <Share2 className="size-4" aria-hidden="true" />}
         {copied ? 'Link copied' : label}
       </button>
