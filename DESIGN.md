@@ -100,12 +100,21 @@ applies.
 
 | Class | Use |
 |---|---|
-| `.panel` | The one surface of a region (22 px radius, hairline border) |
+| `.panel` | The one surface of a region (`--radius-panel`, hairline border) |
 | `.bubble`, `.bubble-you` / `.bubble-them` | A borderless tinted fill inside a panel: an answer in a reveal |
 | `.tile` | A big tinted tap target: a This or that side, a set to play |
 | `.display` | A heading in Fraunces; `em` inside is the rose italic |
 | `.option-heart` | The heart in an `.option` that fills when picked |
-| `.anim-rise` / `-pop` / `-flip` / `-float` / `-beat` / `-wiggle` / `-drift` / `-slide-in` / `-bob` / `-picked` | Motion; stagger with `--delay` |
+| `.anim-rise` | Enters by rising and fading in; stagger a list with `--delay` |
+| `.anim-pop` | Springs in from small: a stamp, a chip, a score |
+| `.anim-flip` | Turns in like a card: the answers at a reveal |
+| `.anim-slide-in` | Slides in from the right: the next This or that pair |
+| `.anim-picked` | A quick bounce on the side just picked |
+| `.anim-float` | Ambient: art bobbing gently |
+| `.anim-beat` | Ambient: a heart beating |
+| `.anim-wiggle` | Ambient: the sealed envelope wiggling now and then |
+| `.anim-drift` | Ambient: small hearts drifting up |
+| `.anim-bob` | Ambient: the "still answering" dots |
 | `.divide-rows` | Hairlines between sections or rows inside a panel |
 | `.btn` + `.btn-primary` / `.btn-outline` / `.btn-ghost`, `.btn-sm` | Buttons: pills that sink a little when pressed |
 | `.btn-block` | A screen's main action: full width and 52 px on phones, normal from 640 px |
@@ -113,11 +122,89 @@ applies.
 | `.input`, `.textarea` | Text fields, 16 px type |
 | `.option` | A choice: `role="radio"` + `aria-checked`, or a toggle with `aria-pressed` |
 | `.chip`, `.chip-match` | Small labels: the streak, "Matched" |
+| `.link` | An inline text link, rose and bold |
 | `.eyebrow` | Small sentence-case label above a heading |
 | `.side-tab` | Left-hand tab; `aria-current="page"` marks this page |
 | `.tab-bar-item`, `.tab-bar-icon` | A phone tab in the bottom bar; the open one's icon sits in a rose pill |
 | `.skeleton` | Loading placeholder |
 | `.num` | Tabular figures for counts |
+
+## Radius
+
+| Token | Value | Use |
+|---|---|---|
+| `--radius-tail` | `6px` | The corner of an answer bubble nearest its avatar |
+| `--radius-control` | `14px` | Inputs, options, small icon tiles (`rounded-control`) |
+| `--radius-bubble` | `18px` | Answer bubbles |
+| `--radius-panel` | `22px` | Panels and big tiles (`rounded-panel`) |
+| `--radius-pill` | `9999px` | Buttons, chips, tabs, avatars |
+
+Tailwind's own `rounded-sm` to `rounded-3xl` are off the scale; use the
+token utilities above or `rounded-full`.
+
+## Motion
+
+Every transition and animation in `globals.css` takes its timing from these
+tokens; a literal `ms` or `cubic-bezier()` there fails the design test.
+
+| Token | Value | Use |
+|---|---|---|
+| `--dur-fast` | `120ms` | Colour and press feedback |
+| `--dur-base` | `160ms` | A control changing size or fill |
+| `--dur-press` | `300ms` | The bounce on a This or that pick |
+| `--dur-pop` | `320ms` | A heart filling, the open tab's pill |
+| `--dur-slide` | `360ms` | The next This or that pair sliding in |
+| `--dur-enter` | `420ms` | Panels and chips entering |
+| `--dur-flip` | `560ms` | Answers flipping in at a reveal |
+| `--ease-out-soft` | `cubic-bezier(0.22, 1, 0.36, 1)` | Entering and sliding: fast start, gentle stop |
+| `--ease-spring` | `cubic-bezier(0.34, 1.56, 0.64, 1)` | Pops: a small overshoot that reads as joy |
+| `--loop-bob` | `1s` | Ambient loop: answering dots |
+| `--loop-pulse` | `1.4s` | Ambient loop: loading skeleton |
+| `--loop-beat` | `1.6s` | Ambient loop: beating heart |
+| `--loop-wiggle` | `2.8s` | Ambient loop: envelope wiggle |
+| `--loop-float` | `4s` | Ambient loop: floating art |
+| `--loop-drift` | `7s` | Ambient loop: drifting hearts |
+
+Rules: a one-off reward (reveal, match, pick) may move; reading text never
+does. Every `.anim-*` class switches off under `prefers-reduced-motion`, and
+script motion (`HeartBurst`, `CountUp`, haptics) checks it too. A drag that
+follows the finger (the This or that swipe) is direct manipulation, not
+animation, and stays on.
+
+## Illustrations and brand assets
+
+Pictures are inline SVG React components in `src/components/art/`, drawn
+for Us Two. Before drawing a new one, reuse what is there:
+
+| Asset | File | Use |
+|---|---|---|
+| The heart | `heart-path.ts` (`HEART_PATH`, 24 x 24) | Every heart: logo, progress, burst, score |
+| Two hearts mark | `../Wordmark.tsx` (`WordmarkHearts`) | Logo; the app icon is the same drawing |
+| Avatars | `Avatar.tsx` (`Avatar`, `CouplePair`, `EmptySeat`) | A person is always their initial in their colour |
+| Sparkle | `Sparkle.tsx` | Butter four-point star, the one decoration |
+| Scenes | `HeroArt.tsx`, `SealedNote.tsx`, `InviteArt.tsx` | Landing and join; waiting; invite |
+| Ambient | `FloatingHearts.tsx`, `HeartBurst.tsx`, `CountUp.tsx` | Decoration and rewards |
+| Set and pack pictures | `themes.ts` (`setTheme`, `packTheme`) | A lucide icon on a tint per set and pack; add a row for each new one |
+
+Drawing rules, so a new picture matches:
+
+1. **Ink outline, token fills.** Outlines are `var(--foreground)` at 3 px
+   (2 to 2.5 px on small details), round joins. Fills are tokens only
+   (`var(--surface)`, `var(--tint-*)`, `var(--you)`, `var(--them)`,
+   `var(--accent)`), never hex, so dark mode works with no extra code.
+2. **Flat.** No gradients, shadows or blur; one soft ground shape
+   (`--surface-strong` ellipse or a `--tint-blush` blob) at most.
+3. **Rose is you, violet is them**, inside pictures too.
+4. **Decoration is hidden from screen readers** (`aria-hidden="true"`); a
+   picture that carries meaning gets `role="img"` and an `aria-label`.
+5. **Motion through the classes** (`anim-float`, `anim-beat`), never a new
+   keyframe inside a component.
+
+Brand files: `src/app/icon.svg` is the source of the app icon. The PNGs
+(`public/icon-192.png`, `public/icon-512.png`, `src/app/apple-icon.png`) are
+generated from it with `npm run icons`; never edit them by hand. The icon's
+three colours are the light `--background`, `--foreground` and `--accent`
+(checked by the design test). Photos and stock images are not used.
 
 ## Voice
 

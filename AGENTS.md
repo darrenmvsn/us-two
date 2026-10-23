@@ -79,15 +79,32 @@ other tools) follows this file and shares one store of lessons.
 
 ## Design standard
 
-`DESIGN.md` is the UI contract: tokens (light and dark), type scale and the
-component classes in `src/app/globals.css`. Build screens from those classes
-(`.panel`, `.divide-rows`, `.btn-*`, `.option`, `.chip`, `.side-tab`,
-`.tab-bar-item`, `.eyebrow`, `.link`) and tokens; rose (`accent`) means "act /
-selected" only, and green (`match`) means only "you matched". No stacked or
-nested cards, no second nav bar, no native dropdown pickers, no emoji as
-icons. `src/app/design-system.test.ts` fails when `DESIGN.md` and
-`globals.css` disagree or a retired pattern comes back. Change a token in both
-files in one commit. Check every screen at 390px and 1440px, light and dark.
+`DESIGN.md` is the UI contract and the first thing to read before any screen
+work. It holds every token (colour light and dark, type, radius, motion), the
+component classes in `src/app/globals.css`, the illustration rules and the
+brand assets. In short:
+
+- **Phone first.** Us Two is played on phones. Design at 390px, check 360px
+  (nothing may scroll sideways), then 1440px, in light and dark. Main actions
+  are `.btn-block` and sit in reach (`.thumb-bar`); hover styles only apply
+  on devices that hover.
+- **Build from the classes and tokens**: `.panel`, `.divide-rows`, `.bubble`,
+  `.tile`, `.btn-*`, `.option`, `.chip`, `.display`, `.side-tab`,
+  `.tab-bar-item`, `.eyebrow`, `.link`, `.anim-*`. No raw colours, off-scale
+  type, Tailwind `rounded-sm` to `rounded-3xl`, or literal timings: ESLint
+  and `src/app/design-system.test.ts` refuse them. A new value is a new
+  token, added to `globals.css` and `DESIGN.md` in the same commit.
+- **Colour means something.** Rose (`accent`) is "act / selected"; green
+  (`match`) is only "you matched"; rose is you and violet is them, everywhere;
+  the six tints are decoration only.
+- **Flat.** No stacked or nested cards, no second nav bar, no native dropdown
+  pickers, no emoji as icons, no gradients, glass or glow.
+- **Pictures come from `src/components/art/`.** Reuse the heart, avatars,
+  sparkle and scenes there; a new picture follows DESIGN.md § Illustrations
+  (ink outline, token fills, `aria-hidden` when decorative). The app icon's
+  source is `src/app/icon.svg`; regenerate the PNGs with `npm run icons`.
+- **Motion is a reward and optional**: use the `.anim-*` classes, which
+  switch off under reduced motion; script motion checks it too.
 
 ## Product rules
 
