@@ -25,13 +25,15 @@ export function TabBar() {
   return (
     <nav
       aria-label="Game"
-      className="md:hidden fixed inset-x-0 bottom-0 z-10 bg-surface border-t border-edge pb-[env(safe-area-inset-bottom)]"
+      className="md:hidden fixed inset-x-0 bottom-0 z-10 bg-surface border-t border-edge-soft pb-[env(safe-area-inset-bottom)]"
     >
       <ul className="grid grid-cols-5">
         {NAV_ITEMS.map(({ href, label, icon: Icon }) => (
           <li key={href}>
             <Link href={href} className="tab-bar-item" aria-current={current === href ? 'page' : undefined}>
-              <Icon className="size-5" aria-hidden="true" />
+              <span className="tab-bar-icon">
+                <Icon className="size-5" aria-hidden="true" />
+              </span>
               {label === 'This or that' ? 'This/that' : label}
             </Link>
           </li>

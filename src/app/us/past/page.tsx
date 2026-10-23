@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation';
+import { SealedNote } from '@/components/art/SealedNote';
 import { Reveal } from '@/components/play/Reveal';
 import { loadPast } from '@/lib/couple/game';
 import { currentPlayer } from '@/lib/http/player-session';
@@ -13,13 +14,20 @@ function dayLabel(day: string): string {
 export default async function PastPage() {
   const ctx = await currentPlayer();
   if (!ctx) redirect('/');
+  const myName = ctx.player.name;
   const partnerName = ctx.couple.players.find((p) => p.id !== ctx.player.id)?.name ?? 'your partner';
   const past = await loadPast(prisma, ctx);
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-display font-semibold">Past answers</h1>
+      <div className="flex flex-col gap-1">
+        <h1 className="text-display display">Our story so far</h1>
+        <p className="text-secondary">Every question you have both answered, newest first.</p>
+      </div>
       {past.length === 0 ? (
-        <p className="text-secondary">Questions you have both answered show up here.</p>
+        <section className="py-8 flex flex-col items-center text-center gap-3">
+          <SealedNote className="w-36" />
+          <p className="text-secondary">Questions you have both answered show up here.</p>
+        </section>
       ) : (
         <ol className="panel divide-rows">
           {past.map(({ view, revealedOn }) => (
@@ -28,9 +36,9 @@ export default async function PastPage() {
                 <p className="eyebrow">
                   Question {view.number} · {dayLabel(revealedOn)}
                 </p>
-                <h2 className="text-heading font-semibold">{view.question.prompt}</h2>
+                <h2 className="text-heading display">{view.question.prompt}</h2>
               </div>
-              <Reveal round={view} partnerName={partnerName} />
+              <Reveal round={view} myName={myName} partnerName={partnerName} />
             </li>
           ))}
         </ol>

@@ -12,7 +12,7 @@ export default function PrivacyPage() {
         <Wordmark />
       </header>
       <main className="flex-1 w-full max-w-[680px] mx-auto px-4 sm:px-6 py-10 flex flex-col gap-4 text-secondary">
-        <h1 className="text-display font-semibold text-foreground">Privacy</h1>
+        <h1 className="text-display display text-foreground">Privacy</h1>
         <p>
           {APP_NAME} has no accounts. When you start or join a game we keep the first name you type, your answers and
           the time zone of the phone that started the game. We never ask for an email address or a phone number.

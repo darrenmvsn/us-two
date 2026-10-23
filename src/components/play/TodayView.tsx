@@ -1,8 +1,13 @@
 'use client';
 
-import { Flame, Hourglass } from 'lucide-react';
+import { Check, Flame, Heart, Target } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { Avatar, EmptySeat } from '@/components/art/Avatar';
+import { HeartBurst } from '@/components/art/HeartBurst';
+import { InviteArt } from '@/components/art/InviteArt';
+import { SealedNote } from '@/components/art/SealedNote';
 import type { HomeView } from '@/lib/couple/game';
 import { callApi } from '@/lib/client/api';
 import { usePoll } from '@/lib/client/use-poll';
@@ -21,6 +26,7 @@ function hoursFrom(ms: number): string {
 }
 
 export function TodayView({ initial }: { initial: HomeView }) {
+  const router = useRouter();
   const [home, setHome] = useState(initial);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -29,7 +35,10 @@ export function TodayView({ initial }: { initial: HomeView }) {
 
   async function refresh() {
     const result = await callApi<HomeView>('/api/us');
-    if (result.ok) setHome(result.data);
+    if (!result.ok) return;
+    // The header's avatars are drawn on the server: redraw them once the partner joins.
+    if (!home.partner && result.data.partner) router.refresh();
+    setHome(result.data);
   }
 
   // Watch for the partner joining or answering; stop once there is nothing to wait for.
@@ -53,13 +62,14 @@ export function TodayView({ initial }: { initial: HomeView }) {
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center gap-2">
         {home.streak > 0 ? (
-          <span className="chip">
-            <Flame className="size-3.5" aria-hidden="true" />
+          <span className="chip bg-tint-butter text-foreground anim-pop">
+            <Flame className="size-3.5 text-accent fill-accent anim-beat" aria-hidden="true" />
             <span className="num">{home.streak}</span> {home.streak === 1 ? 'day' : 'days'} in a row
           </span>
         ) : null}
         {home.guesses.mine.total > 0 ? (
-          <span className="chip">
+          <span className="chip bg-tint-lilac text-foreground anim-pop" style={{ animationDelay: '120ms' }}>
+            <Target className="size-3.5 text-them" aria-hidden="true" />
             You guessed {partnerName} right <span className="num">{home.guesses.mine.right}</span> of{' '}
             <span className="num">{home.guesses.mine.total}</span>
           </span>
@@ -67,8 +77,10 @@ export function TodayView({ initial }: { initial: HomeView }) {
       </div>
 
       {!home.partner && home.inviteCode ? (
-        <section className="panel p-5 flex flex-col gap-3" aria-labelledby="invite">
-          <h2 id="invite" className="text-heading font-semibold">
+        <section className="panel p-5 flex flex-col sm:flex-row-reverse sm:items-center gap-4 anim-rise" aria-labelledby="invite">
+          <InviteArt className="w-40 sm:w-48 shrink-0 self-center" />
+          <div className="flex flex-col gap-3">
+          <h2 id="invite" className="text-heading display">
             Send your partner the link
           </h2>
           <p className="text-secondary">
@@ -81,14 +93,18 @@ export function TodayView({ initial }: { initial: HomeView }) {
             label="Send invite"
             primary={round?.state !== 'answer'}
           />
+          </div>
         </section>
       ) : null}
 
       {round ? (
-        <section className="panel divide-rows" aria-labelledby="question">
-          <div className="p-5 flex flex-col gap-1">
-            <p className="eyebrow">Question {round.number}</p>
-            <h1 id="question" className="text-display font-semibold">
+        <section key={round.id} className="panel divide-rows anim-rise" aria-labelledby="question">
+          <div className="p-5 flex flex-col gap-2">
+            <p className="eyebrow flex items-center gap-1.5">
+              <Heart className="size-3.5 text-accent fill-accent" aria-hidden="true" />
+              Question <span className="num">{round.number}</span> · {home.pack.title}
+            </p>
+            <h1 id="question" className="text-display display">
               {round.question.prompt}
             </h1>
           </div>
@@ -98,6 +114,7 @@ export function TodayView({ initial }: { initial: HomeView }) {
                 <PickForm
                   key={round.id}
                   options={round.question.options}
+                  myName={home.me.name}
                   partnerName={partnerName}
                   busy={busy}
                   onSubmit={(choice, guess) => send({ kind: 'pick', roundId: round.id, choice, guess })}
@@ -106,18 +123,12 @@ export function TodayView({ initial }: { initial: HomeView }) {
                 <OpenForm key={round.id} partnerName={partnerName} busy={busy} onSubmit={(text) => send({ kind: 'open', roundId: round.id, text })} />
               )
             ) : round.state === 'waiting' ? (
-              <div className="flex flex-col gap-3">
-                <p className="text-lead inline-flex items-center gap-2">
-                  <Hourglass className="size-5 text-muted" aria-hidden="true" />
-                  Locked in. Waiting for {partnerName}.
-                </p>
-                <p className="text-secondary">Their answer shows up here as soon as they have answered.</p>
-                {home.partner ? (
-                  <ShareLink path="/us" text={`Your turn on ${APP_NAME}: I answered today's question.`} label={`Nudge ${partnerName}`} />
-                ) : null}
-              </div>
+              <Waiting myName={home.me.name} partnerName={partnerName} hasPartner={Boolean(home.partner)} />
             ) : (
-              <Reveal round={round} partnerName={partnerName} />
+              <>
+                <Reveal round={round} myName={home.me.name} partnerName={partnerName} animate />
+                {round.matched ? <HeartBurst onceKey={round.id} /> : null}
+              </>
             )}
           </div>
           {round.state === 'revealed' ? <NextUp home={home} onOpen={openNext} /> : null}
@@ -128,8 +139,41 @@ export function TodayView({ initial }: { initial: HomeView }) {
           ) : null}
         </section>
       ) : (
-        <p className="text-secondary">You have answered every question we have. New ones are on the way.</p>
+        <section className="panel p-6 flex flex-col items-center text-center gap-3">
+          <SealedNote className="w-36" />
+          <p className="text-secondary">You have answered every question we have. New ones are on the way.</p>
+        </section>
       )}
+    </div>
+  );
+}
+
+/** Your answer sealed in an envelope, a tick by you and three dots by them. */
+function Waiting({ myName, partnerName, hasPartner }: { myName: string; partnerName: string; hasPartner: boolean }) {
+  return (
+    <div className="flex flex-col items-center text-center gap-4">
+      <SealedNote className="w-40" />
+      <div className="flex flex-col gap-1">
+        <p className="text-heading display">Locked in. Waiting for {partnerName}.</p>
+        <p className="text-secondary">Their answer shows up here as soon as they have answered.</p>
+      </div>
+      <ul className="flex items-center gap-6" aria-label="Who has answered">
+        <li className="flex items-center gap-2 text-caption font-semibold">
+          <Avatar name={myName} who="you" size="sm" />
+          <Check className="size-4 text-match" aria-hidden="true" />
+          <span className="sr-only">You have answered</span>
+        </li>
+        <li className="flex items-center gap-2 text-caption font-semibold">
+          {hasPartner ? <Avatar name={partnerName} who="them" size="sm" /> : <EmptySeat size="sm" />}
+          <span className="flex gap-1" aria-hidden="true">
+            {[0, 160, 320].map((delay) => (
+              <span key={delay} className="size-1.5 rounded-full bg-them anim-bob" style={{ animationDelay: `${delay}ms` }} />
+            ))}
+          </span>
+          <span className="sr-only">{partnerName} has not answered yet</span>
+        </li>
+      </ul>
+      {hasPartner ? <ShareLink path="/us" text={`Your turn on ${APP_NAME}: I answered today's question.`} label={`Nudge ${partnerName}`} /> : null}
     </div>
   );
 }
@@ -141,7 +185,7 @@ function NextUp({ home, onOpen }: { home: HomeView; onOpen: () => void }) {
         <div className="p-5 flex flex-wrap items-center justify-between gap-3">
           <p className="text-secondary">Your first day comes with a few extra questions.</p>
           <button type="button" className="btn btn-primary" onClick={onOpen}>
-            Next question
+            <Heart className="size-4" aria-hidden="true" /> Next question
           </button>
         </div>
       );

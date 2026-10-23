@@ -46,14 +46,14 @@ run('the daily question, end to end on Postgres', () => {
     const round = (await loadHome(db, alex, day1)).round!;
     expect(round.question.kind).toBe('pick');
 
-    expect(await submitAnswer(db, alex, { kind: 'pick', roundId: round.id, choice: 0, guess: 1 })).toEqual({ kind: 'answered' });
-    expect(await submitAnswer(db, alex, { kind: 'pick', roundId: round.id, choice: 1, guess: 1 })).toEqual({ kind: 'already_answered' });
+    expect(await submitAnswer(db, alex, { kind: 'pick', roundId: round.id, choice: 0, guess: 1 }, day1)).toEqual({ kind: 'answered' });
+    expect(await submitAnswer(db, alex, { kind: 'pick', roundId: round.id, choice: 1, guess: 1 }, day1)).toEqual({ kind: 'already_answered' });
     const waiting = await loadHome(db, alex, day1);
     expect(waiting.round).toMatchObject({ state: 'waiting', theirs: null });
     expect(waiting.next).toEqual({ kind: 'waiting_on_answers' });
     expect((await loadHome(db, sam, day1)).round).toMatchObject({ state: 'answer', mine: null, theirs: null });
 
-    await submitAnswer(db, sam, { kind: 'pick', roundId: round.id, choice: 0, guess: 0 });
+    await submitAnswer(db, sam, { kind: 'pick', roundId: round.id, choice: 0, guess: 0 }, day1);
     const revealed = await loadHome(db, sam, day1);
     // The reveal stays on screen; the first day's next question waits to be asked for.
     expect(revealed.round).toMatchObject({ number: 1, state: 'revealed' });

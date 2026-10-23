@@ -13,5 +13,5 @@ export default async function DuelPage({ params }: PageProps<'/us/this-or-that/[
   const duel = await loadDuel(prisma, ctx, duelId);
   if (!duel) notFound();
   const partner = ctx.couple.players.find((p) => p.id !== ctx.player.id);
-  return <DuelPlay key={duel.id} initial={duel} partnerName={partner?.name ?? 'your partner'} />;
+  return <DuelPlay key={duel.id} initial={duel} myName={ctx.player.name} partnerName={partner?.name ?? 'your partner'} />;
 }

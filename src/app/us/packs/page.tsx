@@ -12,7 +12,7 @@ export default async function PacksPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
-        <h1 className="text-display font-semibold">Packs</h1>
+        <h1 className="text-display display">Question packs</h1>
         <p className="text-secondary">Choose where your daily question comes from. It changes from the next question, for both of you.</p>
       </div>
       <PackPicker packs={rows} current={ctx.couple.packId} />

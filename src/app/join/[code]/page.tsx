@@ -2,7 +2,8 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { NameForm } from '@/components/landing/NameForm';
-import { QuestionPreview } from '@/components/landing/QuestionPreview';
+import { CouplePair } from '@/components/art/Avatar';
+import { HeroArt } from '@/components/art/HeroArt';
 import { SiteFooter } from '@/components/SiteFooter';
 import { Wordmark } from '@/components/Wordmark';
 import { inviteInfo } from '@/lib/couple/game';
@@ -33,8 +34,11 @@ export default async function JoinPage({ params }: PageProps<'/join/[code]'>) {
         <div className="flex flex-col gap-6">
           {info.kind === 'open' ? (
             <>
-              <p className="eyebrow">You are invited</p>
-              <h1 className="text-hero font-semibold">{info.starterName} wants to play {APP_NAME} with you.</h1>
+              <CouplePair you={info.starterName} them={null} size="lg" />
+              <p className="chip self-start bg-tint-blush text-foreground">You are invited</p>
+              <h1 className="text-hero display">
+                {info.starterName} wants to play <em>{APP_NAME}</em> with you.
+              </h1>
               <p className="text-lead text-secondary">
                 One question a day for the two of you. Answer on your own, guess theirs, and see both once you have both
                 answered.
@@ -53,7 +57,7 @@ export default async function JoinPage({ params }: PageProps<'/join/[code]'>) {
             </>
           ) : (
             <>
-              <h1 className="text-display font-semibold">
+              <h1 className="text-display display">
                 {info.kind === 'taken' ? 'Someone has already joined with this link.' : 'This link has expired.'}
               </h1>
               <p className="text-lead text-secondary">Ask your partner for a new link, or start your own game.</p>
@@ -63,7 +67,7 @@ export default async function JoinPage({ params }: PageProps<'/join/[code]'>) {
             </>
           )}
         </div>
-        <QuestionPreview />
+        <HeroArt you={info.kind === 'open' ? info.starterName : 'Alex'} them="You" />
       </main>
       <SiteFooter />
     </>

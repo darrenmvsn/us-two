@@ -1,5 +1,6 @@
 'use client';
 
+import { Heart } from 'lucide-react';
 import { useId, useState } from 'react';
 
 const MAX = 500;
@@ -33,6 +34,7 @@ export function OpenForm({ partnerName, busy, onSubmit }: { partnerName: string;
         </p>
       </div>
       <button type="submit" className="btn btn-primary self-start" disabled={busy || !text.trim()}>
+        <Heart className="size-4" aria-hidden="true" />
         {busy ? 'Sending…' : 'Lock it in'}
       </button>
     </form>

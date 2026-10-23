@@ -10,6 +10,9 @@ its own licence:
 | Zod | MIT |
 | lucide-react (icons) | ISC |
 | Tailwind CSS | MIT |
+| canvas-confetti (the heart burst), Copyright (c) 2020 Kiril Vatev | ISC |
+| Fraunces typeface (Undercase Type), via @fontsource-variable/fraunces | SIL OFL 1.1 (font), MIT (packaging) |
 
-Every question, This or that set and line of copy was written for Us Two;
+Every illustration in `src/components/art/` was drawn for Us Two. Every
+question, This or that set and line of copy was written for Us Two;
 none is taken from another app, a study or a book.
