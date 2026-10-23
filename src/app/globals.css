@@ -56,6 +56,24 @@
   --match-soft: color-mix(in srgb, var(--match) 12%, transparent);
   --you-soft: color-mix(in srgb, var(--you) 12%, var(--surface));
   --them-soft: color-mix(in srgb, var(--them) 12%, var(--surface));
+
+  /* Motion: the same in both modes. Every transition and animation uses these. */
+  --dur-fast: 120ms;
+  --dur-base: 160ms;
+  --dur-press: 300ms;
+  --dur-pop: 320ms;
+  --dur-slide: 360ms;
+  --dur-enter: 420ms;
+  --dur-flip: 560ms;
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* Ambient loops: slow enough to sit in the corner of the eye. */
+  --loop-bob: 1s;
+  --loop-pulse: 1.4s;
+  --loop-beat: 1.6s;
+  --loop-wiggle: 2.8s;
+  --loop-float: 4s;
+  --loop-drift: 7s;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -155,8 +173,11 @@
   --text-hero-lg: 56px;
   --text-hero-lg--line-height: 58px;
 
+  --radius-tail: 6px;
   --radius-control: 14px;
+  --radius-bubble: 18px;
   --radius-panel: 22px;
+  --radius-pill: 9999px;
 }
 
 html {
@@ -225,19 +246,19 @@ a,
 
 /* A borderless tinted fill: an answer in a reveal, a quiet group inside a panel. */
 .bubble {
-  border-radius: 18px;
+  border-radius: var(--radius-bubble);
   padding: 14px 16px;
   background: var(--surface-raised);
 }
 
 .bubble-you {
   background: var(--you-soft);
-  border-bottom-left-radius: 6px;
+  border-bottom-left-radius: var(--radius-tail);
 }
 
 .bubble-them {
   background: var(--them-soft);
-  border-bottom-right-radius: 6px;
+  border-bottom-right-radius: var(--radius-tail);
 }
 
 /* Buttons: 44px, the smallest comfortable thumb target (WCAG 2.5.5). They sink a little when pressed. */
@@ -248,11 +269,11 @@ a,
   gap: 8px;
   height: 44px;
   padding: 0 20px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   font-size: var(--text-body);
   font-weight: 600;
   white-space: nowrap;
-  transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease, transform 120ms ease;
+  transition: background-color var(--dur-fast) ease, border-color var(--dur-fast) ease, color var(--dur-fast) ease, transform var(--dur-fast) ease;
 }
 
 .btn:active:not(:disabled) {
@@ -396,7 +417,7 @@ a,
   font-size: var(--text-lead);
   font-weight: 500;
   text-align: left;
-  transition: border-color 120ms ease, background-color 120ms ease, transform 160ms ease;
+  transition: border-color var(--dur-fast) ease, background-color var(--dur-fast) ease, transform var(--dur-base) ease;
 }
 
 @media (hover: hover) {
@@ -419,13 +440,13 @@ a,
 .option-heart {
   flex-shrink: 0;
   color: var(--edge-strong);
-  transition: color 120ms ease;
+  transition: color var(--dur-fast) ease;
 }
 
 .option[aria-checked="true"] .option-heart {
   color: var(--accent);
   fill: var(--accent);
-  animation: pop 320ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: pop var(--dur-pop) var(--ease-spring);
 }
 
 /* A big tinted tile: a This or that side, a set to play. */
@@ -441,7 +462,7 @@ a,
   padding: 16px;
   text-align: center;
   color: var(--foreground);
-  transition: transform 160ms ease;
+  transition: transform var(--dur-base) ease;
 }
 
 .tile:active:not(:disabled) {
@@ -454,7 +475,7 @@ a,
   gap: 4px;
   height: 28px;
   padding: 0 12px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--surface-raised);
   color: var(--secondary);
   font-size: var(--text-meta);
@@ -491,7 +512,7 @@ a,
   gap: 10px;
   height: 44px;
   padding: 0 14px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   color: var(--muted);
   font-weight: 500;
   white-space: nowrap;
@@ -529,8 +550,8 @@ a,
   place-items: center;
   width: 52px;
   height: 28px;
-  border-radius: 999px;
-  transition: background-color 160ms ease;
+  border-radius: var(--radius-pill);
+  transition: background-color var(--dur-base) ease;
 }
 
 .tab-bar-item[aria-current="page"] {
@@ -540,13 +561,13 @@ a,
 
 .tab-bar-item[aria-current="page"] .tab-bar-icon {
   background: var(--accent-soft);
-  animation: pop 320ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: pop var(--dur-pop) var(--ease-spring);
 }
 
 .skeleton {
   background: var(--surface-raised);
   border-radius: var(--radius-control);
-  animation: pulse 1.4s ease-in-out infinite;
+  animation: pulse var(--loop-pulse) ease-in-out infinite;
 }
 
 /*
@@ -555,53 +576,53 @@ a,
  * can stagger without a new class per step.
  */
 .anim-rise {
-  animation: rise 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: rise var(--dur-enter) var(--ease-out-soft) both;
   animation-delay: var(--delay, 0ms);
 }
 
 .anim-pop {
-  animation: pop 420ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  animation: pop var(--dur-enter) var(--ease-spring) both;
   animation-delay: var(--delay, 0ms);
 }
 
 .anim-flip {
-  animation: flip-in 560ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: flip-in var(--dur-flip) var(--ease-out-soft) both;
   animation-delay: var(--delay, 0ms);
   transform-origin: center;
   backface-visibility: hidden;
 }
 
 .anim-float {
-  animation: float 4s ease-in-out infinite;
+  animation: float var(--loop-float) ease-in-out infinite;
   animation-delay: var(--delay, 0ms);
 }
 
 .anim-beat {
-  animation: beat 1.6s ease-in-out infinite;
+  animation: beat var(--loop-beat) ease-in-out infinite;
   transform-origin: center;
   transform-box: fill-box;
 }
 
 .anim-wiggle {
-  animation: wiggle 2.8s ease-in-out infinite;
+  animation: wiggle var(--loop-wiggle) ease-in-out infinite;
   transform-origin: 50% 80%;
 }
 
 .anim-drift {
-  animation: drift 7s ease-in infinite;
+  animation: drift var(--loop-drift) ease-in infinite;
   animation-delay: var(--delay, 0ms);
 }
 
 .anim-slide-in {
-  animation: slide-in 360ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: slide-in var(--dur-slide) var(--ease-out-soft) both;
 }
 
 .anim-bob {
-  animation: bob 1s ease-in-out infinite;
+  animation: bob var(--loop-bob) ease-in-out infinite;
 }
 
 .anim-picked {
-  animation: picked 300ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  animation: picked var(--dur-press) var(--ease-spring) both;
 }
 
 @keyframes pulse {

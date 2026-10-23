@@ -40,7 +40,7 @@ export function SetPicker({ home, partnerName }: { home: ThisOrThatHome; partner
 
       {open && openTheme && OpenIcon ? (
         <section className="panel p-4 flex items-center gap-4 anim-rise" aria-label="Open set">
-          <span className={`${TINT_BG[openTheme.tint]} size-14 rounded-2xl grid place-items-center shrink-0`} aria-hidden="true">
+          <span className={`${TINT_BG[openTheme.tint]} size-14 rounded-control grid place-items-center shrink-0`} aria-hidden="true">
             <OpenIcon className="size-7" />
           </span>
           <div className="flex-1 min-w-0">
