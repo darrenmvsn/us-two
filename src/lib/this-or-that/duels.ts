@@ -1,6 +1,8 @@
 import { Prisma } from '@prisma/client';
 import type { Db } from '@/lib/prisma';
 import type { PlayerContext } from '@/lib/couple/game';
+import { duelPlayed, duelRevealed } from '@/lib/nudges/messages';
+import { nudgePlayer } from '@/lib/nudges/send';
 import { reportThisOrThatPlayed, reportThisOrThatRevealed } from '@/lib/analytics/product-events';
 import { THIS_OR_THAT_SETS, matchCount, matchVerdict, thisOrThatSetById, type ThisOrThatSet } from './sets';
 
@@ -125,6 +127,12 @@ export async function submitPicks(db: Db, ctx: PlayerContext, duelId: string, ch
   const seat = ctx.player.seat === 1 ? 1 : 0;
   reportThisOrThatPlayed(picksId, ctx.player.id, seat, set.id);
   const other = duel.picks.find((p) => p.playerId !== ctx.player.id);
-  if (other) reportThisOrThatRevealed(ctx.couple.id, duel.id, set.id, matchCount(choices, other.choices));
+  if (other) {
+    reportThisOrThatRevealed(ctx.couple.id, duel.id, set.id, matchCount(choices, other.choices));
+    nudgePlayer(db, other.playerId, duelRevealed(ctx.player.name, set.title, duel.id));
+  } else {
+    const partner = ctx.couple.players.find((p) => p.id !== ctx.player.id);
+    if (partner) nudgePlayer(db, partner.id, duelPlayed(ctx.player.name, set.title, duel.id));
+  }
   return { kind: 'sent' };
 }

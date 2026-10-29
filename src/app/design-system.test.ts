@@ -1,7 +1,7 @@
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { PAGE_COLOUR } from '@/lib/theme-colors';
+import { CARD_COLOUR, PAGE_COLOUR } from '@/lib/theme-colors';
 
 /**
  * Holds DESIGN.md (the contract) and globals.css (the values) to one set of
@@ -45,6 +45,19 @@ describe('design tokens', () => {
 
   it('keeps the literal page colour for the browser chrome in step with --background', () => {
     expect(PAGE_COLOUR).toEqual({ light: light.get('--background'), dark: dark.get('--background') });
+  });
+
+  it('draws share cards in the light tokens', () => {
+    const kebab = (name: string) => `--${name.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`)}`;
+    const mixOnSurface = (token: string) => {
+      // color-mix(in srgb, var(--token) 12%, var(--surface)), per channel.
+      const [a, b] = [light.get(token)!, light.get('--surface')!].map((hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16)));
+      return `#${a!.map((c, i) => Math.round(c * 0.12 + b![i]! * 0.88).toString(16).padStart(2, '0')).join('')}`;
+    };
+    for (const [name, value] of Object.entries(CARD_COLOUR)) {
+      const expected = name.endsWith('Soft') ? mixOnSurface(kebab(name.slice(0, -4))) : light.get(kebab(name));
+      expect(value, name).toBe(expected);
+    }
   });
 
   it('documents every token with the same light and dark values', () => {

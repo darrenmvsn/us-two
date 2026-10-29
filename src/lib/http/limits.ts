@@ -9,6 +9,10 @@ export const routeLimits = {
   startCouple: createFixedWindowLimiter({ limit: 20, windowMs: HOUR }),
   /** Joining also covers guessing invite codes, which are 31^10 to one. */
   joinCouple: createFixedWindowLimiter({ limit: 30, windowMs: HOUR }),
+  /** Using a "link another phone" code, which also covers guessing them. */
+  linkPhone: createFixedWindowLimiter({ limit: 30, windowMs: HOUR }),
+  /** Share cards: each one is drawn on demand, so a few a minute is plenty. */
+  shareCard: createFixedWindowLimiter({ limit: 20, windowMs: MINUTE }),
   /** Writes inside a game. */
   play: createFixedWindowLimiter({ limit: 60, windowMs: MINUTE }),
   /** Reads, including the waiting screen's poll every few seconds. */

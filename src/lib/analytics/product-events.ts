@@ -59,3 +59,11 @@ export function reportThisOrThatRevealed(coupleId: string, duelId: string, set: 
 export function reportCoupleEnded(coupleId: string, roundsRevealed: number): void {
   captureProductEvent({ event: 'couple_ended', distinctId: coupleId, factId: coupleId, properties: { rounds_revealed: roundsRevealed } });
 }
+
+export function reportPhoneLinked(linkId: string, playerId: string, addedBy: 'self' | 'partner'): void {
+  captureProductEvent({ event: 'phone_linked', distinctId: playerId, factId: linkId, properties: { added_by: addedBy } });
+}
+
+export function reportNudgesTurnedOn(subscriptionId: string, playerId: string): void {
+  captureProductEvent({ event: 'nudges_turned_on', distinctId: playerId, factId: subscriptionId, properties: {} });
+}

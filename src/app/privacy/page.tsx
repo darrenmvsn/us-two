@@ -21,7 +21,12 @@ export default function PrivacyPage() {
         </p>
         <p>
           Your phone is remembered by a cookie that only this site can read. Lose it (a new phone, cleared browser data)
-          and that phone cannot get back into the game.
+          and you can still get back in: either of you can make a one-time link in Settings that signs a new phone in.
+          Settings lists every phone signed in as you, and can sign the others out.
+        </p>
+        <p>
+          If you turn on nudges, your browser&apos;s push service (Apple, Google or Mozilla) delivers them to your phone. A
+          nudge names your partner, never an answer.
         </p>
         <p>
           Your partner sees your answer only after they have answered the same question. Nobody else sees your answers.
