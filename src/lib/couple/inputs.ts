@@ -57,3 +57,41 @@ export const startDuelSchema = z.strictObject({ setId: z.string().min(1).max(32)
 export function firstIssue(error: z.ZodError): string {
   return error.issues[0]?.message ?? 'Invalid input.';
 }
+
+/**
+ * The push services browsers subscribe through. Any other endpoint is refused:
+ * the server posts to it, so an open list would let anyone aim it at any host.
+ */
+const PUSH_SERVICE_HOSTS = ['fcm.googleapis.com', 'push.services.mozilla.com', 'push.apple.com', 'notify.windows.com'];
+
+export function isPushServiceEndpoint(value: string): boolean {
+  try {
+    const url = new URL(value);
+    return (
+      url.protocol === 'https:' &&
+      url.port === '' &&
+      PUSH_SERVICE_HOSTS.some((host) => url.hostname === host || url.hostname.endsWith(`.${host}`))
+    );
+  } catch {
+    return false;
+  }
+}
+
+const pushEndpoint = z.string().max(1000).refine(isPushServiceEndpoint, 'This browser cannot get nudges.');
+const base64url = z.string().regex(/^[A-Za-z0-9_-]+={0,2}$/).max(200);
+
+/** `PushSubscription.toJSON()`, as the browser sends it. */
+export const nudgeSubscriptionSchema = z.object({
+  endpoint: pushEndpoint,
+  keys: z.object({ p256dh: base64url, auth: base64url }),
+});
+
+export type NudgeSubscriptionInput = z.infer<typeof nudgeSubscriptionSchema>;
+
+export const nudgeEndpointSchema = z.strictObject({ endpoint: pushEndpoint });
+
+export const deviceLinkForSchema = z.strictObject({ for: z.enum(['me', 'partner']) });
+
+export const deviceLinkCodeSchema = z.strictObject({
+  code: z.string().regex(INVITE_CODE, 'That link is not right. Make a new one in Settings.'),
+});

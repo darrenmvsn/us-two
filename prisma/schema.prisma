@@ -36,8 +36,57 @@ model Player {
   createdAt DateTime @default(now())
   answers   Answer[]
   duelPicks DuelPicks[]
+  devices   PlayerDevice[]
+  links     DeviceLink[]
+  nudges    NudgeSubscription[]
 
   @@unique([coupleId, seat])
+}
+
+/// Another phone signed in as a player, added with a one-time link from
+/// Settings. Its cookie works like the player's own: only the hash is kept.
+model PlayerDevice {
+  id          String   @id @default(cuid())
+  playerId    String
+  player      Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  tokenHash   String   @unique
+  /// The seat that made the link: the player, or their partner getting them back in.
+  addedBySeat Int
+  createdAt   DateTime @default(now())
+
+  @@index([playerId])
+}
+
+/// A one-time link that signs a new phone in as `player`. Works once, until
+/// `expiresAt`; only the code's hash is kept.
+model DeviceLink {
+  id            String    @id @default(cuid())
+  playerId      String
+  player        Player    @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  codeHash      String    @unique
+  createdBySeat Int
+  expiresAt     DateTime
+  usedAt        DateTime?
+  createdAt     DateTime  @default(now())
+
+  @@index([playerId])
+}
+
+/// A phone's web push subscription: "Sam answered, your turn". Deleted when
+/// the push service says it is gone, or when that phone is signed out.
+model NudgeSubscription {
+  id        String   @id @default(cuid())
+  playerId  String
+  player    Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  /// The push service's address for this phone; one subscription per browser.
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  /// Hash of the cookie of the phone that turned nudges on.
+  tokenHash String
+  createdAt DateTime @default(now())
+
+  @@index([playerId])
 }
 
 /// One question put to a couple. Revealed when both players have an Answer:

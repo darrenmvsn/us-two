@@ -21,7 +21,7 @@ export function Avatar({ name, who, size = 'md' }: { name: string; who: Person; 
 /** The two of you, overlapping, with a small heart where you meet. */
 export function CouplePair({ you, them, size = 'md', beating = false }: { you: string; them: string | null; size?: 'sm' | 'md' | 'lg'; beating?: boolean }) {
   return (
-    <span className="relative inline-flex items-center" role="img" aria-label={them ? `${you} and ${them}` : `${you}, waiting for a partner`}>
+    <span className="relative inline-flex items-center w-fit" role="img" aria-label={them ? `${you} and ${them}` : `${you}, waiting for a partner`}>
       <Avatar name={you} who="you" size={size} />
       <span className="-ml-1.5">
         {them ? <Avatar name={them} who="them" size={size} /> : <EmptySeat size={size} />}

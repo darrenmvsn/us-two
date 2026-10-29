@@ -32,6 +32,10 @@ const EVENT_SCHEMAS = {
   this_or_that_played: z.strictObject({ seat, set: pack }),
   /** Both played a This or that set. */
   this_or_that_revealed: z.strictObject({ set: pack, matched: z.number().int().min(0).max(10) }),
+  /** A phone signed in with a one-time link: added by the player, or by their partner to get them back in. */
+  phone_linked: z.strictObject({ added_by: z.enum(['self', 'partner']) }),
+  /** A phone turned on nudges (web push). */
+  nudges_turned_on: z.strictObject({}),
   /** A player ended the game and deleted the couple's data. */
   couple_ended: z.strictObject({ rounds_revealed: z.number().int().min(0) }),
 } as const;

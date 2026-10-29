@@ -1,4 +1,4 @@
-import { after } from 'next/server';
+import { runAfterResponse } from '@/lib/after-response';
 import { readAnalyticsConfig, type AnalyticsConfig } from './analytics-config';
 import {
   AnalyticsVocabularyError,
@@ -123,27 +123,13 @@ async function deliver(transport: AnalyticsTransport, envelope: AnalyticsEnvelop
   }
 }
 
-/**
- * Run `task` after the response is sent when called inside a request
- * (route handler, server action, server component), otherwise now, without
- * awaiting it. `task` never rejects.
- */
-function scheduleDelivery(task: () => Promise<void>): void {
-  try {
-    after(task);
-  } catch {
-    // Outside a request scope (a script, a test): nothing to wait for.
-    void task();
-  }
-}
-
 /** Report one fact. Returns at once; never throws outside tests. */
 export function captureProductEvent<E extends AnalyticsEventName>(input: ProductEvent<E>): void {
   try {
     const envelope = buildAnalyticsEnvelope(input);
     const transport = resolveTransport();
     if (!transport) return;
-    scheduleDelivery(() => deliver(transport, envelope));
+    runAfterResponse(() => deliver(transport, envelope));
   } catch (error) {
     if (isTestRun()) throw error;
     const reason = error instanceof Error ? error.message : 'unknown error';

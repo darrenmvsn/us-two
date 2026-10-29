@@ -16,14 +16,26 @@ import { HeartBurst } from '@/components/art/HeartBurst';
 import { SealedNote } from '@/components/art/SealedNote';
 import { TINT_BG, setTheme } from '@/components/art/themes';
 import { HEART_PATH } from '@/components/art/heart-path';
+import { ShareCard } from '@/components/play/ShareCard';
 import { ShareLink } from '@/components/play/ShareLink';
+import { NudgeOffer } from '@/components/play/NudgeToggle';
 
 const POLL_MS = 5_000;
 /** How long the picked side holds its pop before the next pair slides in. */
 const PICK_HOLD_MS = 260;
 
 /** Quick-fire: one pair at a time, tap a side, next pair. Sent whole at the end. */
-export function DuelPlay({ initial, myName, partnerName }: { initial: DuelView; myName: string; partnerName: string }) {
+export function DuelPlay({
+  initial,
+  myName,
+  partnerName,
+  nudgeKey,
+}: {
+  initial: DuelView;
+  myName: string;
+  partnerName: string;
+  nudgeKey: string | null;
+}) {
   const [duel, setDuel] = useState(initial);
   const [picks, setPicks] = useState<(0 | 1)[]>([]);
   const [flash, setFlash] = useState<0 | 1 | null>(null);
@@ -95,6 +107,7 @@ export function DuelPlay({ initial, myName, partnerName }: { initial: DuelView; 
         </h1>
         <p className="text-secondary">Your score shows up here as soon as they have played.</p>
         <ShareLink path={`/us/this-or-that/${duel.id}`} text={`Your turn: ${duel.set.title}, This or that on ${APP_NAME}.`} label={`Send to ${partnerName}`} primary />
+        {nudgeKey ? <NudgeOffer publicKey={nudgeKey} partnerName={partnerName} /> : null}
       </section>
     );
   }
@@ -237,9 +250,12 @@ function DuelResult({ duel, myName, partnerName }: { duel: DuelView; myName: str
           );
         })}
       </ol>
-      <Link href="/us/this-or-that" className="btn btn-primary btn-block">
-        Play another set
-      </Link>
+      <div className="flex flex-col sm:flex-row gap-3">
+        <ShareCard src={`/api/us/this-or-that/${duel.id}/card`} fileName={`us-two-${duel.set.id}.png`} label="Share our score" primary />
+        <Link href="/us/this-or-that" className="btn btn-outline btn-block">
+          Play another set
+        </Link>
+      </div>
     </div>
   );
 }

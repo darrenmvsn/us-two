@@ -8,6 +8,8 @@ import {
   reportQuestionAnswered,
   reportRoundRevealed,
 } from '@/lib/analytics/product-events';
+import { partnerAnswered, partnerJoined, roundRevealed } from '@/lib/nudges/messages';
+import { nudgePlayer } from '@/lib/nudges/send';
 import { DEFAULT_PACK, isPackId, packAccess, packById, questionById, type PackId } from '@/lib/questions/packs';
 import { toStoredChoice, type Seat } from '@/lib/questions/perspective';
 import type { Question } from '@/lib/questions/types';
@@ -27,16 +29,20 @@ import { buildRoundView, guessScores, revealedAt, type Names, type RoundView, ty
 export interface PlayerContext {
   player: Player;
   couple: Couple & { players: Player[] };
+  /** Hash of the token this phone presented: which of the player's phones is asking. */
+  tokenHash: string;
 }
 
+/** The player a phone's token names: the phone they started or joined on, or one they linked since. */
 export async function resolvePlayer(db: Db, token: string): Promise<PlayerContext | null> {
-  const player = await db.player.findUnique({
-    where: { tokenHash: hashPlayerToken(token) },
+  const tokenHash = hashPlayerToken(token);
+  const player = await db.player.findFirst({
+    where: { OR: [{ tokenHash }, { devices: { some: { tokenHash } } }] },
     include: { couple: { include: { players: true } } },
   });
   if (!player) return null;
   const { couple, ...rest } = player;
-  return { player: rest, couple };
+  return { player: rest, couple, tokenHash };
 }
 
 function seatOf(player: Player): Seat {
@@ -66,7 +72,7 @@ export async function startCouple(db: Db, input: { name: string; timeZone: strin
           createdAt: now,
           timeZone: input.timeZone,
           packId: DEFAULT_PACK,
-          players: { create: { seat: 0, name: input.name, tokenHash } },
+          players: { create: { seat: 0, name: input.name, tokenHash, createdAt: now } },
         },
         include: { players: true },
       });
@@ -101,13 +107,14 @@ export async function joinCouple(
   current: PlayerContext | null,
   now: Date = new Date(),
 ): Promise<JoinResult> {
-  const couple = await db.couple.findUnique({ where: { inviteCode: input.inviteCode } });
+  const couple = await db.couple.findUnique({ where: { inviteCode: input.inviteCode }, include: { players: { select: { id: true } } } });
   if (!couple) return { kind: 'not_found' };
   if (current?.couple.id === couple.id) return { kind: 'own_invite' };
   const { token, tokenHash } = newPlayerToken();
   try {
-    const player = await db.player.create({ data: { coupleId: couple.id, seat: 1, name: input.name, tokenHash } });
+    const player = await db.player.create({ data: { coupleId: couple.id, seat: 1, name: input.name, tokenHash, createdAt: now } });
     reportPartnerJoined(couple.id, player.id, (now.getTime() - couple.createdAt.getTime()) / 3_600_000);
+    for (const starter of couple.players) nudgePlayer(db, starter.id, partnerJoined(player.name));
     return { kind: 'joined', token };
   } catch (error) {
     // (coupleId, seat) is unique: two people racing for one link, one wins.
@@ -139,14 +146,11 @@ type LoadedRound = {
   answers: (StoredAnswer & { id: string })[];
 };
 
-async function loadRounds(db: Db, ctx: PlayerContext): Promise<LoadedRound[]> {
+type RoundRow = Prisma.RoundGetPayload<{ include: { answers: true } }>;
+
+function toLoadedRound(ctx: PlayerContext, r: RoundRow): LoadedRound {
   const seatByPlayer = new Map(ctx.couple.players.map((p) => [p.id, seatOf(p)]));
-  const rounds = await db.round.findMany({
-    where: { coupleId: ctx.couple.id },
-    orderBy: { number: 'asc' },
-    include: { answers: true },
-  });
-  return rounds.map((r) => ({
+  return {
     id: r.id,
     number: r.number,
     questionId: r.questionId,
@@ -159,7 +163,16 @@ async function loadRounds(db: Db, ctx: PlayerContext): Promise<LoadedRound[]> {
       text: a.text,
       createdAt: a.createdAt,
     })),
-  }));
+  };
+}
+
+async function loadRounds(db: Db, ctx: PlayerContext): Promise<LoadedRound[]> {
+  const rounds = await db.round.findMany({
+    where: { coupleId: ctx.couple.id },
+    orderBy: { number: 'asc' },
+    include: { answers: true },
+  });
+  return rounds.map((r) => toLoadedRound(ctx, r));
 }
 
 /**
@@ -296,6 +309,10 @@ export async function submitAnswer(db: Db, ctx: PlayerContext, input: AnswerInpu
     // derived on read, so the game is unaffected.)
     const matched = question.kind === 'pick' ? other.choice === data.choice : null;
     reportRoundRevealed(ctx.couple.id, round.id, { kind: question.kind, roundNumber: round.number, matched });
+    nudgePlayer(db, other.playerId, roundRevealed(ctx.player.name));
+  } else {
+    const partner = ctx.couple.players.find((p) => p.id !== ctx.player.id);
+    if (partner) nudgePlayer(db, partner.id, partnerAnswered(ctx.player.name));
   }
   return { kind: 'answered' };
 }
@@ -317,6 +334,14 @@ export async function loadPast(db: Db, ctx: PlayerContext): Promise<PastRound[]>
       view: buildRoundView(r, questionOf(r), r.answers, seat, names),
       revealedOn: dayKeyIn(ctx.couple.timeZone, revealedAt(r.answers)!),
     }));
+}
+
+/** One revealed round from this player's side, for its share card; null until both have answered. */
+export async function loadRevealedRound(db: Db, ctx: PlayerContext, roundId: string): Promise<RoundView | null> {
+  const row = await db.round.findFirst({ where: { id: roundId, coupleId: ctx.couple.id }, include: { answers: true } });
+  if (!row || row.answers.length < 2) return null;
+  const round = toLoadedRound(ctx, row);
+  return buildRoundView(round, questionOf(round), round.answers, seatOf(ctx.player), namesOf(ctx.couple.players));
 }
 
 export type PackResult = { kind: 'chosen' } | { kind: 'unknown_pack' };

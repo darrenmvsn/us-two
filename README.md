@@ -35,7 +35,9 @@ npm run build
 |---|---|
 | `src/lib/questions/` | The question bank, packs and the "Me / partner" perspective |
 | `src/lib/this-or-that/` | This or that sets, scoring and the game between two phones |
-| `src/lib/couple/` | Starting, joining, rounds, the schedule, streaks and what each player may see |
+| `src/lib/couple/` | Starting, joining, rounds, the schedule, streaks, what each player may see, and extra phones (`devices.ts`) |
+| `src/lib/nudges/` | Web push nudges ("Sam answered, your turn"), off until `VAPID_*` is set; the service worker is `public/sw.js` |
+| `src/lib/share-card/` | Story-sized share cards drawn with `next/og`; fonts in `assets/fonts` |
 | `src/app/api/` | Thin route handlers (`docs/architecture/api-routes.md`) |
 | `src/app/us/` | The in-game screens |
 | `deploy/oracle/` | The kit for the shared Oracle VM |

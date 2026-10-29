@@ -12,9 +12,11 @@ import type { HomeView } from '@/lib/couple/game';
 import { callApi } from '@/lib/client/api';
 import { usePoll } from '@/lib/client/use-poll';
 import { APP_NAME } from '@/lib/brand';
+import { NudgeOffer } from './NudgeToggle';
 import { OpenForm } from './OpenForm';
 import { PickForm } from './PickForm';
 import { Reveal } from './Reveal';
+import { ShareCard } from './ShareCard';
 import { ShareLink } from './ShareLink';
 
 const POLL_MS = 5_000;
@@ -25,7 +27,7 @@ function hoursFrom(ms: number): string {
   return hours > 0 ? `${hours} h ${minutes} min` : `${minutes} min`;
 }
 
-export function TodayView({ initial }: { initial: HomeView }) {
+export function TodayView({ initial, nudgeKey }: { initial: HomeView; nudgeKey: string | null }) {
   const router = useRouter();
   const [home, setHome] = useState(initial);
   const [busy, setBusy] = useState(false);
@@ -123,11 +125,14 @@ export function TodayView({ initial }: { initial: HomeView }) {
                 <OpenForm key={round.id} partnerName={partnerName} busy={busy} onSubmit={(text) => send({ kind: 'open', roundId: round.id, text })} />
               )
             ) : round.state === 'waiting' ? (
-              <Waiting myName={home.me.name} partnerName={partnerName} hasPartner={Boolean(home.partner)} />
+              <Waiting myName={home.me.name} partnerName={partnerName} hasPartner={Boolean(home.partner)} nudgeKey={nudgeKey} />
             ) : (
               <>
                 <Reveal round={round} myName={home.me.name} partnerName={partnerName} animate />
                 {round.matched ? <HeartBurst onceKey={round.id} /> : null}
+                <div className="pt-5 flex justify-center">
+                  <ShareCard src={`/api/us/rounds/${round.id}/card`} fileName={`us-two-question-${round.number}.png`} label="Share this one" />
+                </div>
               </>
             )}
           </div>
@@ -149,7 +154,7 @@ export function TodayView({ initial }: { initial: HomeView }) {
 }
 
 /** Your answer sealed in an envelope, a tick by you and three dots by them. */
-function Waiting({ myName, partnerName, hasPartner }: { myName: string; partnerName: string; hasPartner: boolean }) {
+function Waiting({ myName, partnerName, hasPartner, nudgeKey }: { myName: string; partnerName: string; hasPartner: boolean; nudgeKey: string | null }) {
   return (
     <div className="flex flex-col items-center text-center gap-4">
       <SealedNote className="w-40" />
@@ -174,6 +179,7 @@ function Waiting({ myName, partnerName, hasPartner }: { myName: string; partnerN
         </li>
       </ul>
       {hasPartner ? <ShareLink path="/us" text={`Your turn on ${APP_NAME}: I answered today's question.`} label={`Nudge ${partnerName}`} /> : null}
+      {hasPartner && nudgeKey ? <NudgeOffer publicKey={nudgeKey} partnerName={partnerName} /> : null}
     </div>
   );
 }
