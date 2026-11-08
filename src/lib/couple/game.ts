@@ -348,7 +348,10 @@ export type PackResult = { kind: 'chosen' } | { kind: 'unknown_pack' };
 
 /** Takes effect from the next round; the one on screen keeps its question. */
 export async function choosePack(db: Db, ctx: PlayerContext, packId: string): Promise<PackResult> {
-  if (!isPackId(packId) || packAccess(packById(packId)) !== 'open') return { kind: 'unknown_pack' };
+  if (!isPackId(packId)) return { kind: 'unknown_pack' };
+  const pack = packById(packId);
+  // Friends and siblings packs are played together on one phone, never as a couple's daily question.
+  if (pack.audience !== 'couple' || packAccess(pack) !== 'open') return { kind: 'unknown_pack' };
   if (ctx.couple.packId !== packId) {
     await db.couple.update({ where: { id: ctx.couple.id }, data: { packId } });
     reportPackChosen(ctx.couple.id, packId);

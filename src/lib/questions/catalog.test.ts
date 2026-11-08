@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { QUESTIONS_BY_PACK } from './catalog';
-import { PACKS, isPackId, questionById } from './packs';
+import { COUPLE_PACKS, PACKS, isPackId, questionById } from './packs';
 
 const all = Object.values(QUESTIONS_BY_PACK).flat();
 
@@ -25,6 +25,13 @@ describe('the question catalog', () => {
 
   it('keeps every prompt short enough for a phone and a slideshow', () => {
     for (const q of all) expect(q.prompt.length, q.id).toBeLessThanOrEqual(90);
+  });
+
+  it('keeps friends and siblings packs out of the daily game', () => {
+    const ids = COUPLE_PACKS.map((p) => p.id);
+    expect(ids).not.toContain('best-friends');
+    expect(ids).not.toContain('siblings');
+    expect(ids).toContain('late-night');
   });
 
   it('finds questions by id', () => {

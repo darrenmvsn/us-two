@@ -6,7 +6,7 @@ const nextConfig: NextConfig = {
   output: "standalone",
   outputFileTracingRoot: process.cwd(),
   // Share cards read their fonts from disk at request time.
-  outputFileTracingIncludes: { "/api/us/**/card": ["./assets/fonts/*.woff"] },
+  outputFileTracingIncludes: { "/api/us/**/card": ["./assets/fonts/*.woff"], "/api/together/**": ["./assets/fonts/*.woff"] },
   async headers() {
     return [
       {

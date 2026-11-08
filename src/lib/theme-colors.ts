@@ -28,5 +28,9 @@ export const CARD_COLOUR = {
   matchText: '#16663f',
   tintBlush: '#ffdbe4',
   tintButter: '#ffeab0',
+  tintLilac: '#e7e0ff',
+  tintMint: '#d3f0e0',
+  tintPeach: '#ffdcc8',
+  tintSky: '#d7e9ff',
 } as const;
 /* eslint-enable no-restricted-syntax */
