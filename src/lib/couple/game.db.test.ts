@@ -106,6 +106,7 @@ run('the daily question, end to end on Postgres', () => {
     const { alex, sam } = await pair();
     await loadHome(db, alex, day1);
     expect(await choosePack(db, alex, 'nope')).toEqual({ kind: 'unknown_pack' });
+    expect(await choosePack(db, alex, 'siblings')).toEqual({ kind: 'unknown_pack' });
     expect(await choosePack(db, alex, 'deep')).toEqual({ kind: 'chosen' });
     const reloaded = { ...alex, couple: { ...alex.couple, packId: 'deep' } };
     const first = (await loadHome(db, reloaded, day1)).round!;

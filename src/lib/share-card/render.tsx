@@ -20,7 +20,7 @@ const FONT_DIR = path.join(process.cwd(), 'assets/fonts');
 
 let fonts: Promise<NonNullable<ConstructorParameters<typeof ImageResponse>[1]>['fonts']> | null = null;
 
-function loadFonts() {
+export function loadFonts() {
   fonts ??= Promise.all([
     readFile(path.join(FONT_DIR, 'fraunces-latin-600-normal.woff')),
     readFile(path.join(FONT_DIR, 'inter-latin-500-normal.woff')),
@@ -33,8 +33,8 @@ function loadFonts() {
   return fonts;
 }
 
-const display: CSSProperties = { fontFamily: 'Fraunces', fontWeight: 600, color: C.foreground };
-const label: CSSProperties = { fontFamily: 'Inter', fontWeight: 500, color: C.muted };
+export const display: CSSProperties = { fontFamily: 'Fraunces', fontWeight: 600, color: C.foreground };
+export const label: CSSProperties = { fontFamily: 'Inter', fontWeight: 500, color: C.muted };
 
 function Heart({ size, fill, stroke }: { size: number; fill: string; stroke?: string }) {
   return (
@@ -78,7 +78,7 @@ function Couple({ people }: { people: CardContent['people'] }) {
   );
 }
 
-function Footer() {
+export function Footer() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>

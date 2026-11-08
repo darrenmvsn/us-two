@@ -2,14 +2,14 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { PackPicker } from '@/components/play/PackPicker';
 import { currentPlayer } from '@/lib/http/player-session';
-import { PACKS, questionsIn } from '@/lib/questions/packs';
+import { COUPLE_PACKS, questionsIn } from '@/lib/questions/packs';
 
 export const metadata = { title: 'Packs' };
 
 export default async function PacksPage() {
   const ctx = await currentPlayer();
   if (!ctx) redirect('/');
-  const rows = PACKS.map((p) => ({ id: p.id, title: p.title, blurb: p.blurb, count: questionsIn(p.id).length }));
+  const rows = COUPLE_PACKS.map((p) => ({ id: p.id, title: p.title, blurb: p.blurb, count: questionsIn(p.id).length }));
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">

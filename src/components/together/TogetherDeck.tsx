@@ -21,8 +21,8 @@ export function TogetherDeck({
   packTitle: string;
   tint: Tint;
   cards: readonly TogetherCard[];
-  /** Where the end of the pack sends you: the daily game, started or not. */
-  next: { href: string; label: string };
+  /** Where the end of the pack sends you, and the line that says why. */
+  next: { href: string; label: string; line: string };
 }) {
   const total = cards.length;
   // Undefined while the server renders: the saved place is only read in the browser.
@@ -61,7 +61,7 @@ export function TogetherDeck({
         <h1 id="pack-done" className="text-display display">
           That was all of <em>{packTitle}.</em>
         </h1>
-        <p className="text-secondary">Keep it going with one question a day, answered on your own phones.</p>
+        <p className="text-secondary">{next.line}</p>
         <Link href={next.href} className="btn btn-primary btn-block">
           {next.label}
         </Link>
@@ -69,9 +69,11 @@ export function TogetherDeck({
           <button type="button" className="btn btn-ghost btn-sm" onClick={() => go(0)}>
             <RotateCcw className="size-4" aria-hidden="true" /> From the start
           </button>
-          <Link href="/together" className="btn btn-ghost btn-sm">
-            Another pack
-          </Link>
+          {next.href === '/together' ? null : (
+            <Link href="/together" className="btn btn-ghost btn-sm">
+              Another pack
+            </Link>
+          )}
         </div>
       </section>
     );

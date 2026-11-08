@@ -13,17 +13,30 @@ export interface Pack {
    * check in `packAccess`, not a hunt through the UI.
    */
   tier: 'free' | 'plus';
+  /**
+   * `couple` packs are for the daily game and for playing together.
+   * `anyone` packs (friends, siblings) are only played together on one
+   * phone: the daily game is for a couple.
+   */
+  audience: 'couple' | 'anyone';
 }
 
 export const PACKS: readonly Pack[] = [
-  { id: 'everyday', title: 'Everyday', blurb: 'Light, funny and a little sweet. The default.', tier: 'free' },
-  { id: 'would-you-rather', title: 'Would you rather', blurb: 'Two options, no easy answers.', tier: 'plus' },
-  { id: 'deep', title: 'Deep', blurb: 'For nights when you want a real talk.', tier: 'plus' },
-  { id: 'future-us', title: 'Future us', blurb: 'Homes, trips, plans and the far future.', tier: 'plus' },
-  { id: 'long-distance', title: 'Long distance', blurb: 'For couples in different places.', tier: 'plus' },
-  { id: 'money-home', title: 'Money and home', blurb: 'Bills, chores and how you live together.', tier: 'plus' },
-  { id: 'flirty', title: 'Flirty', blurb: 'Compliments, crushes and date nights.', tier: 'plus' },
+  { id: 'everyday', title: 'Everyday', blurb: 'Light, funny and a little sweet. The default.', tier: 'free', audience: 'couple' },
+  { id: 'would-you-rather', title: 'Would you rather', blurb: 'Two options, no easy answers.', tier: 'plus', audience: 'couple' },
+  { id: 'deep', title: 'Deep', blurb: 'For nights when you want a real talk.', tier: 'plus', audience: 'couple' },
+  { id: 'future-us', title: 'Future us', blurb: 'Homes, trips, plans and the far future.', tier: 'plus', audience: 'couple' },
+  { id: 'long-distance', title: 'Long distance', blurb: 'For couples in different places.', tier: 'plus', audience: 'couple' },
+  { id: 'money-home', title: 'Money and home', blurb: 'Bills, chores and how you live together.', tier: 'plus', audience: 'couple' },
+  { id: 'flirty', title: 'Flirty', blurb: 'Compliments, crushes and date nights.', tier: 'plus', audience: 'couple' },
+  { id: 'late-night', title: 'Late night talks', blurb: 'Quiet questions for when the lights are off.', tier: 'plus', audience: 'couple' },
+  { id: 'getting-to-know', title: 'Getting to know you', blurb: 'For the first few dates, from easy to real.', tier: 'plus', audience: 'couple' },
+  { id: 'best-friends', title: 'Best friends', blurb: 'For you and your person who is not your partner.', tier: 'plus', audience: 'anyone' },
+  { id: 'siblings', title: 'Siblings', blurb: 'Growing up together, and what comes next.', tier: 'plus', audience: 'anyone' },
 ];
+
+/** The packs the daily game can use. */
+export const COUPLE_PACKS: readonly Pack[] = PACKS.filter((pack) => pack.audience === 'couple');
 
 export const DEFAULT_PACK: PackId = 'everyday';
 

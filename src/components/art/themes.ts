@@ -1,16 +1,20 @@
 import {
   Armchair,
   CalendarHeart,
+  Coffee,
   Coins,
   Flame,
   Globe2,
+  House,
   HeartHandshake,
   MessageCircleHeart,
   Moon,
+  MoonStar,
   Plane,
   Shuffle,
   Sun,
   UtensilsCrossed,
+  Users,
   Wine,
   type LucideIcon,
 } from 'lucide-react';
@@ -52,6 +56,10 @@ const PACK_THEMES: Record<string, Theme> = {
   'long-distance': { icon: Globe2, tint: 'mint' },
   'money-home': { icon: Coins, tint: 'peach' },
   flirty: { icon: Flame, tint: 'blush' },
+  'late-night': { icon: MoonStar, tint: 'sky' },
+  'getting-to-know': { icon: Coffee, tint: 'peach' },
+  'best-friends': { icon: Users, tint: 'butter' },
+  siblings: { icon: House, tint: 'mint' },
 };
 
 export const setTheme = (id: string): Theme => SET_THEMES[id] ?? FALLBACK;
