@@ -29,6 +29,10 @@ export default function PrivacyPage() {
           nudge names your partner, never an answer.
         </p>
         <p>
+          Playing a pack together on one phone sends us nothing. Your phone remembers which card you reached in each
+          pack, and only your phone has it.
+        </p>
+        <p>
           Your partner sees your answer only after they have answered the same question. Nobody else sees your answers.
         </p>
         <p>

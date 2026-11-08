@@ -1,4 +1,5 @@
 import { Link2, MessageCircleHeart, Smartphone } from 'lucide-react';
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import type { CSSProperties } from 'react';
 import { HeroArt } from '@/components/art/HeroArt';
@@ -99,14 +100,17 @@ export default async function LandingPage() {
           <h2 id="packs" className="text-display display">
             Questions for every mood
           </h2>
+          <p className="text-secondary max-w-[480px]">Sitting together tonight? Open a pack and play it on one phone, right now.</p>
           <ul className="flex flex-wrap gap-2">
             {PACKS.map((pack) => {
               const theme = packTheme(pack.id);
               const Icon = theme.icon;
               return (
-                <li key={pack.id} className={`${TINT_BG[theme.tint]} h-11 px-4 rounded-full inline-flex items-center gap-2 font-semibold`}>
-                  <Icon className="size-4" aria-hidden="true" />
-                  {pack.title}
+                <li key={pack.id}>
+                  <Link href={`/together/${pack.id}`} className={`${TINT_BG[theme.tint]} h-11 px-4 rounded-full inline-flex items-center gap-2 font-semibold text-foreground`}>
+                    <Icon className="size-4" aria-hidden="true" />
+                    {pack.title}
+                  </Link>
                 </li>
               );
             })}

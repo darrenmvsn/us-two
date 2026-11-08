@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { PackPicker } from '@/components/play/PackPicker';
 import { currentPlayer } from '@/lib/http/player-session';
@@ -16,6 +17,13 @@ export default async function PacksPage() {
         <p className="text-secondary">Choose where your daily question comes from. It changes from the next question, for both of you.</p>
       </div>
       <PackPicker packs={rows} current={ctx.couple.packId} />
+      <p className="text-secondary">
+        Together right now?{' '}
+        <Link href="/together" className="link">
+          Play a pack on one phone
+        </Link>
+        , card after card.
+      </p>
     </div>
   );
 }
