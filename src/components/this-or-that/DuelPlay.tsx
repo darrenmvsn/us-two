@@ -2,6 +2,7 @@
 
 import { ArrowLeft, Heart } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState, type CSSProperties } from 'react';
 import type { DuelView } from '@/lib/this-or-that/duels';
 import { callApi } from '@/lib/client/api';
@@ -36,6 +37,7 @@ export function DuelPlay({
   partnerName: string;
   nudgeKey: string | null;
 }) {
+  const router = useRouter();
   const [duel, setDuel] = useState(initial);
   const [picks, setPicks] = useState<(0 | 1)[]>([]);
   const [flash, setFlash] = useState<0 | 1 | null>(null);
@@ -46,6 +48,8 @@ export function DuelPlay({
   async function refresh() {
     const result = await callApi<DuelView>(`/api/us/this-or-that/${duel.id}`);
     if (result.ok) setDuel(result.data);
+    // The game was ended on the other phone: the server sends this one home.
+    else if (result.status === 401) router.refresh();
   }
   usePoll(duel.state === 'waiting', POLL_MS, refresh);
 
@@ -156,7 +160,7 @@ export function DuelPlay({
             <button
               key={label}
               type="button"
-              className={`tile ${TINT_BG[theme.tint]} min-h-[38dvh] sm:min-h-[240px] text-heading display transition-[opacity,scale] ${flash === side ? 'anim-picked ring-4 ring-accent' : ''} ${leaning === side ? 'scale-105 ring-4 ring-accent' : ''} ${(flash !== null && flash !== side) || (leaning !== null && leaning !== side) ? 'opacity-50' : ''}`}
+              className={`tile ${TINT_BG[theme.tint]} min-h-[38dvh] sm:min-h-[240px] px-6 hyphens-auto text-heading display transition-[opacity,scale] ${flash === side ? 'anim-picked ring-4 ring-accent' : ''} ${leaning === side ? 'scale-105 ring-4 ring-accent' : ''} ${(flash !== null && flash !== side) || (leaning !== null && leaning !== side) ? 'opacity-50' : ''}`}
               disabled={busy}
               onClick={() => pick(side)}
             >

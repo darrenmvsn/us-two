@@ -20,6 +20,11 @@ is the reference.
    `prisma` passed in. It returns a discriminated result, not an HTTP response.
 5. **Map the result** with an exhaustive `switch (result.kind)`.
 
+Export each handler wrapped in `guardRoute` (`src/lib/server/unexpected-error.ts`):
+`export const POST = guardRoute(async function POST(request: Request) { … })`.
+A thrown error (the database down, a bug) then answers a clean JSON 503 or
+500 instead of an empty 500, and is logged on the server.
+
 ## Responses
 
 - Success: the resource as a plain object with `Cache-Control: private,
@@ -37,6 +42,8 @@ is the reference.
 | 409 | Already answered, already joined, a newer round exists, or the next question is not due |
 | 415 | Not JSON |
 | 429 | Rate limited |
+| 500 | `server_error`: something nobody planned for (`guardRoute`) |
+| 503 | `unavailable`: the database cannot be reached; try again (`guardRoute`) |
 
 ## Analytics
 

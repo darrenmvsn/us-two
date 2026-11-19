@@ -31,8 +31,8 @@ Viralab, DesignLoop and Moatlab:
    within thumb reach (`.btn-block`, `.thumb-bar`); This or that picks by tap
    or by swiping towards a side; hover styles only apply on devices that
    hover; headers respect the notch (`env(safe-area-inset-top)`).
-5. **Thumb-sized.** Buttons, inputs and tabs are 44 px (36 px small), options
-   48 px. One primary (rose) button per region.
+5. **Thumb-sized.** Buttons, inputs and tabs are 44 px (36 px small, with a
+   44 px tap area), options 48 px. One primary (rose) button per region.
 6. **Navigation**: left-hand tabs (`.side-tab`) on wide screens; on phones
    the same links in one bar at the bottom (`.tab-bar-item`). Never a second
    bar under the header. No native dropdown pickers: choices are `.option`

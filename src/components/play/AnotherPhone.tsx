@@ -1,12 +1,17 @@
 'use client';
 
 import { Smartphone } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { encode } from 'uqr';
 import { APP_NAME } from '@/lib/brand';
 import { callApi } from '@/lib/client/api';
 import { ShareLink } from './ShareLink';
+
+/** Loaded once a link is made, so Settings does not carry the QR encoder up front. */
+const QrCode = dynamic(() => import('./QrCode').then((m) => m.QrCode), {
+  loading: () => <div className="w-48 h-48 rounded-control skeleton" aria-hidden="true" />,
+});
 
 /** A phone signed in as you, as Settings lists it. `addedOn` is already a date to show. */
 export interface PhoneRow {
@@ -21,18 +26,6 @@ interface MadeLink {
   for: LinkFor;
   path: string;
   url: string;
-}
-
-/** The modules of a QR code as one path, on a quiet zone of four modules. */
-function QrCode({ value }: { value: string }) {
-  const { data, size } = encode(value, { ecc: 'M', border: 4 });
-  const modules = data.flatMap((row, y) => row.flatMap((dark, x) => (dark ? [`M${x} ${y}h1v1h-1z`] : [])));
-  return (
-    <svg viewBox={`0 0 ${size} ${size}`} className="w-48 h-48 rounded-control" role="img" aria-label="QR code of the link" shapeRendering="crispEdges">
-      <rect width={size} height={size} fill="var(--surface)" />
-      <path d={modules.join('')} fill="var(--foreground)" />
-    </svg>
-  );
 }
 
 function phoneLabel(phone: PhoneRow, partnerName: string | null, firstPhone: string): string {

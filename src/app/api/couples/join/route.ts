@@ -5,9 +5,10 @@ import { currentPlayer, setPlayerCookie } from '@/lib/http/player-session';
 import { clientKey } from '@/lib/http/rate-limit';
 import { errorResponse, privateJson, rateLimited, readJson } from '@/lib/http/responses';
 import { prisma } from '@/lib/prisma';
+import { guardRoute } from '@/lib/server/unexpected-error';
 
 /** Join the game an invite link names, as the second player. */
-export async function POST(request: Request) {
+export const POST = guardRoute(async function POST(request: Request) {
   if (!routeLimits.joinCouple.allow(clientKey(request))) return rateLimited();
   const json = await readJson(request);
   if (!json.ok) return json.response;
@@ -26,4 +27,4 @@ export async function POST(request: Request) {
     case 'not_found':
       return errorResponse(404, 'not_found', 'This link has expired or the game was ended.');
   }
-}
+});

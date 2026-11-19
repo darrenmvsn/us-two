@@ -5,9 +5,10 @@ import { clientKey } from '@/lib/http/rate-limit';
 import { errorResponse, noContent, rateLimited, readJson, signedOut } from '@/lib/http/responses';
 import { prisma } from '@/lib/prisma';
 import { submitPicks } from '@/lib/this-or-that/duels';
+import { guardRoute } from '@/lib/server/unexpected-error';
 
 /** Send all ten picks for a set at once. Final. */
-export async function POST(request: Request, ctx: RouteContext<'/api/us/this-or-that/[duelId]/picks'>) {
+export const POST = guardRoute(async function POST(request: Request, ctx: RouteContext<'/api/us/this-or-that/[duelId]/picks'>) {
   if (!routeLimits.play.allow(clientKey(request))) return rateLimited();
   const player = await currentPlayer();
   if (!player) return signedOut();
@@ -28,4 +29,4 @@ export async function POST(request: Request, ctx: RouteContext<'/api/us/this-or-
     case 'not_found':
       return errorResponse(404, 'not_found');
   }
-}
+});

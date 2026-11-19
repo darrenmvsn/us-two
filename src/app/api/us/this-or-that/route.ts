@@ -5,16 +5,17 @@ import { clientKey } from '@/lib/http/rate-limit';
 import { errorResponse, privateJson, rateLimited, readJson, signedOut } from '@/lib/http/responses';
 import { prisma } from '@/lib/prisma';
 import { loadThisOrThat, startDuel } from '@/lib/this-or-that/duels';
+import { guardRoute } from '@/lib/server/unexpected-error';
 
-export async function GET(request: Request) {
+export const GET = guardRoute(async function GET(request: Request) {
   if (!routeLimits.read.allow(clientKey(request))) return rateLimited();
   const ctx = await currentPlayer();
   if (!ctx) return signedOut();
   return privateJson(await loadThisOrThat(prisma, ctx));
-}
+});
 
 /** Start a This or that set, or get the one already open. */
-export async function POST(request: Request) {
+export const POST = guardRoute(async function POST(request: Request) {
   if (!routeLimits.play.allow(clientKey(request))) return rateLimited();
   const ctx = await currentPlayer();
   if (!ctx) return signedOut();
@@ -32,4 +33,4 @@ export async function POST(request: Request) {
     case 'unknown_set':
       return errorResponse(404, 'unknown_set');
   }
-}
+});

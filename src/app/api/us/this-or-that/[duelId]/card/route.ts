@@ -6,9 +6,10 @@ import { prisma } from '@/lib/prisma';
 import { cardPeople, duelCardContent } from '@/lib/share-card/card-content';
 import { renderShareCard } from '@/lib/share-card/render';
 import { loadDuel } from '@/lib/this-or-that/duels';
+import { guardRoute } from '@/lib/server/unexpected-error';
 
 /** A This or that score as a story-sized PNG, once both of you have played. */
-export async function GET(request: Request, ctx: RouteContext<'/api/us/this-or-that/[duelId]/card'>) {
+export const GET = guardRoute(async function GET(request: Request, ctx: RouteContext<'/api/us/this-or-that/[duelId]/card'>) {
   if (!routeLimits.shareCard.allow(clientKey(request))) return rateLimited();
   const player = await currentPlayer();
   if (!player) return signedOut();
@@ -16,4 +17,4 @@ export async function GET(request: Request, ctx: RouteContext<'/api/us/this-or-t
   const duel = await loadDuel(prisma, player, duelId);
   const card = duel ? duelCardContent(duel, cardPeople(player)) : null;
   return card ? renderShareCard(card) : errorResponse(404, 'not_found');
-}
+});

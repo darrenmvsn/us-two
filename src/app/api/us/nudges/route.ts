@@ -6,9 +6,10 @@ import { errorResponse, noContent, rateLimited, readJson, signedOut } from '@/li
 import { nudgePublicKey } from '@/lib/nudges/nudge-config';
 import { turnOffNudges, turnOnNudges } from '@/lib/nudges/subscriptions';
 import { prisma } from '@/lib/prisma';
+import { guardRoute } from '@/lib/server/unexpected-error';
 
 /** Turn nudges on for this phone: the browser's push subscription. */
-export async function POST(request: Request) {
+export const POST = guardRoute(async function POST(request: Request) {
   if (!routeLimits.play.allow(clientKey(request))) return rateLimited();
   const ctx = await currentPlayer();
   if (!ctx) return signedOut();
@@ -20,10 +21,10 @@ export async function POST(request: Request) {
 
   await turnOnNudges(prisma, ctx, parsed.data);
   return noContent();
-}
+});
 
 /** Turn nudges off for this phone. */
-export async function DELETE(request: Request) {
+export const DELETE = guardRoute(async function DELETE(request: Request) {
   if (!routeLimits.play.allow(clientKey(request))) return rateLimited();
   const ctx = await currentPlayer();
   if (!ctx) return signedOut();
@@ -34,4 +35,4 @@ export async function DELETE(request: Request) {
 
   await turnOffNudges(prisma, ctx, parsed.data.endpoint);
   return noContent();
-}
+});

@@ -54,7 +54,7 @@ function Refused({ heading, body, me, next }: { heading: string; body: string; m
           {next.label}
         </Link>
       ) : (
-        <Link href="/" className="link">
+        <Link href="/" className="btn btn-primary btn-block">
           Back to {APP_NAME}
         </Link>
       )}

@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { packTheme } from '@/components/art/themes';
 import { TogetherDeck } from '@/components/together/TogetherDeck';
-import { currentPlayer } from '@/lib/http/player-session';
+import { holdsPlayerCookie } from '@/lib/server/player-cookie';
 import { isPackId, packById } from '@/lib/questions/packs';
 import { togetherDeck, togetherPacks } from '@/lib/together/deck';
 
@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: PageProps<'/together/[packId]
 export default async function TogetherPackPage({ params }: PageProps<'/together/[packId]'>) {
   const pack = openPack((await params).packId);
   if (!pack) notFound();
-  const inGame = Boolean(await currentPlayer());
+  const inGame = await holdsPlayerCookie();
   return (
     <TogetherDeck
       packId={pack.id}

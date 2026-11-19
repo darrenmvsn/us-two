@@ -5,7 +5,7 @@ import { HEART_PATH } from './art/heart-path';
 /** Two hearts leaning on each other, ink and rose, and the name in the display face. */
 export function Wordmark({ href = '/' }: { href?: string }) {
   return (
-    <Link href={href} className="inline-flex items-center gap-2 text-heading text-foreground display">
+    <Link href={href} className="inline-flex items-center gap-2 min-h-11 text-heading text-foreground display">
       <WordmarkHearts />
       {APP_NAME}
     </Link>

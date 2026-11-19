@@ -1,4 +1,5 @@
 import { Prisma, type Couple, type Player } from '@prisma/client';
+import { cache } from 'react';
 import type { Db } from '@/lib/prisma';
 import {
   reportCoupleEnded,
@@ -33,8 +34,12 @@ export interface PlayerContext {
   tokenHash: string;
 }
 
-/** The player a phone's token names: the phone they started or joined on, or one they linked since. */
-export async function resolvePlayer(db: Db, token: string): Promise<PlayerContext | null> {
+/**
+ * The player a phone's token names: the phone they started or joined on, or
+ * one they linked since. Cached for one server render, so a page and its
+ * layout share one query (React's `cache` does nothing outside a render).
+ */
+export const resolvePlayer = cache(async function resolvePlayer(db: Db, token: string): Promise<PlayerContext | null> {
   const tokenHash = hashPlayerToken(token);
   const player = await db.player.findFirst({
     where: { OR: [{ tokenHash }, { devices: { some: { tokenHash } } }] },
@@ -43,7 +48,7 @@ export async function resolvePlayer(db: Db, token: string): Promise<PlayerContex
   if (!player) return null;
   const { couple, ...rest } = player;
   return { player: rest, couple, tokenHash };
-}
+});
 
 function seatOf(player: Player): Seat {
   return player.seat === 1 ? 1 : 0;

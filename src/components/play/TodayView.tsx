@@ -37,7 +37,11 @@ export function TodayView({ initial, nudgeKey }: { initial: HomeView; nudgeKey: 
 
   async function refresh() {
     const result = await callApi<HomeView>('/api/us');
-    if (!result.ok) return;
+    if (!result.ok) {
+      // The game was ended on the other phone: the server sends this one home.
+      if (result.status === 401) router.refresh();
+      return;
+    }
     // The header's avatars are drawn on the server: redraw them once the partner joins.
     if (!home.partner && result.data.partner) router.refresh();
     setHome(result.data);
@@ -47,8 +51,13 @@ export function TodayView({ initial, nudgeKey }: { initial: HomeView; nudgeKey: 
   usePoll(!home.partner || round?.state === 'waiting', POLL_MS, refresh);
 
   async function openNext() {
-    await callApi('/api/us/rounds', { method: 'POST' });
+    setBusy(true);
+    setError(null);
+    const result = await callApi('/api/us/rounds', { method: 'POST' });
+    // not_yet: the other phone already opened it, and the refresh shows it.
+    if (!result.ok && result.error !== 'not_yet') setError(result.message);
     await refresh();
+    setBusy(false);
   }
 
   async function send(body: Record<string, unknown>) {
@@ -66,14 +75,18 @@ export function TodayView({ initial, nudgeKey }: { initial: HomeView; nudgeKey: 
         {home.streak > 0 ? (
           <span className="chip bg-tint-butter text-foreground anim-pop">
             <Flame className="size-3.5 text-accent fill-accent anim-beat" aria-hidden="true" />
-            <span className="num">{home.streak}</span> {home.streak === 1 ? 'day' : 'days'} in a row
+            <span>
+              <span className="num">{home.streak}</span> {home.streak === 1 ? 'day' : 'days'} in a row
+            </span>
           </span>
         ) : null}
         {home.guesses.mine.total > 0 ? (
           <span className="chip bg-tint-lilac text-foreground anim-pop" style={{ animationDelay: '120ms' }}>
             <Target className="size-3.5 text-them" aria-hidden="true" />
-            You guessed {partnerName} right <span className="num">{home.guesses.mine.right}</span> of{' '}
-            <span className="num">{home.guesses.mine.total}</span>
+            <span>
+              You guessed {partnerName} right <span className="num">{home.guesses.mine.right}</span> of{' '}
+              <span className="num">{home.guesses.mine.total}</span>
+            </span>
           </span>
         ) : null}
       </div>
@@ -104,7 +117,9 @@ export function TodayView({ initial, nudgeKey }: { initial: HomeView; nudgeKey: 
           <div className="p-5 flex flex-col gap-2">
             <p className="eyebrow flex items-center gap-1.5">
               <Heart className="size-3.5 text-accent fill-accent" aria-hidden="true" />
-              Question <span className="num">{round.number}</span> · {home.pack.title}
+              <span>
+                Question <span className="num">{round.number}</span> · {home.pack.title}
+              </span>
             </p>
             <h1 id="question" className="text-display display">
               {round.question.prompt}
@@ -136,7 +151,7 @@ export function TodayView({ initial, nudgeKey }: { initial: HomeView; nudgeKey: 
               </>
             )}
           </div>
-          {round.state === 'revealed' ? <NextUp home={home} onOpen={openNext} /> : null}
+          {round.state === 'revealed' ? <NextUp home={home} busy={busy} onOpen={openNext} /> : null}
           {error ? (
             <p role="alert" className="p-5 text-caption text-accent-text">
               {error}
@@ -184,13 +199,13 @@ function Waiting({ myName, partnerName, hasPartner, nudgeKey }: { myName: string
   );
 }
 
-function NextUp({ home, onOpen }: { home: HomeView; onOpen: () => void }) {
+function NextUp({ home, busy, onOpen }: { home: HomeView; busy: boolean; onOpen: () => void }) {
   switch (home.next.kind) {
     case 'open':
       return (
         <div className="p-5 flex flex-wrap items-center justify-between gap-3">
           <p className="text-secondary">Your first day comes with a few extra questions.</p>
-          <button type="button" className="btn btn-primary btn-block" onClick={onOpen}>
+          <button type="button" className="btn btn-primary btn-block" disabled={busy} onClick={onOpen}>
             <Heart className="size-4" aria-hidden="true" /> Next question
           </button>
         </div>

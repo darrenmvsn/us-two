@@ -5,9 +5,10 @@ import { currentPlayer } from '@/lib/http/player-session';
 import { clientKey } from '@/lib/http/rate-limit';
 import { errorResponse, noContent, rateLimited, readJson, signedOut } from '@/lib/http/responses';
 import { prisma } from '@/lib/prisma';
+import { guardRoute } from '@/lib/server/unexpected-error';
 
 /** Choose the pack the next questions come from. */
-export async function PUT(request: Request) {
+export const PUT = guardRoute(async function PUT(request: Request) {
   if (!routeLimits.play.allow(clientKey(request))) return rateLimited();
   const ctx = await currentPlayer();
   if (!ctx) return signedOut();
@@ -23,4 +24,4 @@ export async function PUT(request: Request) {
     case 'unknown_pack':
       return errorResponse(404, 'unknown_pack');
   }
-}
+});
