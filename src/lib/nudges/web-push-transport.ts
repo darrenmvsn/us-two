@@ -14,16 +14,25 @@ export type NudgeTransport = (target: PushTarget, message: NudgeMessage) => Prom
 
 /** A nudge older than this is not worth showing: the partner has moved on. */
 const TTL_SECONDS = 12 * 60 * 60;
+/**
+ * The most one send may take. web-push's own `timeout` is the socket's idle
+ * time, so a push service that trickles bytes could hold the send (and the
+ * function running it after the response) open for as long as it liked.
+ */
+export const PUSH_DEADLINE_MS = 10_000;
 
 /** Sends through the phone's own push service (Apple, Google, Mozilla) with VAPID: no vendor, no cost. */
-export function createWebPushTransport(config: NudgeConfig): NudgeTransport {
+export function createWebPushTransport(config: NudgeConfig, send: typeof webpush.sendNotification = webpush.sendNotification): NudgeTransport {
   const vapidDetails = { subject: config.subject, publicKey: config.publicKey, privateKey: config.privateKey };
   return async (target, message) => {
     try {
-      await webpush.sendNotification(
-        { endpoint: target.endpoint, keys: { p256dh: target.p256dh, auth: target.auth } },
-        JSON.stringify(message),
-        { vapidDetails, TTL: TTL_SECONDS, urgency: 'normal', timeout: 10_000 },
+      await withDeadline(
+        send(
+          { endpoint: target.endpoint, keys: { p256dh: target.p256dh, auth: target.auth } },
+          JSON.stringify(message),
+          { vapidDetails, TTL: TTL_SECONDS, urgency: 'normal', timeout: PUSH_DEADLINE_MS },
+        ),
+        PUSH_DEADLINE_MS,
       );
       return 'sent';
     } catch (error) {
@@ -31,4 +40,12 @@ export function createWebPushTransport(config: NudgeConfig): NudgeTransport {
       throw error;
     }
   };
+}
+
+function withDeadline<T>(work: Promise<T>, ms: number): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const deadline = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new Error(`push send took over ${ms} ms`)), ms);
+  });
+  return Promise.race([work, deadline]).finally(() => clearTimeout(timer));
 }

@@ -70,6 +70,8 @@ export function isPushServiceEndpoint(value: string): boolean {
     return (
       url.protocol === 'https:' &&
       url.port === '' &&
+      url.username === '' &&
+      url.password === '' &&
       PUSH_SERVICE_HOSTS.some((host) => url.hostname === host || url.hostname.endsWith(`.${host}`))
     );
   } catch {
