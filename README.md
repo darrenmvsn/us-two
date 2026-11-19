@@ -41,3 +41,21 @@ npm run build
 | `src/app/api/` | Thin route handlers (`docs/architecture/api-routes.md`) |
 | `src/app/us/` | The in-game screens |
 | `deploy/oracle/` | The kit for the shared Oracle VM |
+
+## Database connections
+
+`src/lib/prisma.ts` keeps one Prisma client per process, and so one pool.
+Its size is the `connection_limit` on `DATABASE_URL`:
+
+- **Oracle VM** (one long-lived container): `connection_limit=5`, set in
+  `deploy/oracle/docker-compose.yml`. The VM's Postgres is shared with the
+  other apps, so keep it small.
+- **Serverless (Vercel or similar)**: every warm function instance holds its
+  own pool, so use `connection_limit=1` and point `DATABASE_URL` at a pooler
+  (PgBouncer, Neon's or Supabase's pooled host) with `pgbouncer=true`; give
+  `prisma migrate deploy` the direct, unpooled URL (`directUrl` in
+  `prisma/schema.prisma` if you split them).
+
+When the database is unreachable, pages show the error page and every API
+route answers `503 { error: "unavailable" }` (`src/lib/server/unexpected-error.ts`);
+Together mode keeps working, since it reads nothing from the database.

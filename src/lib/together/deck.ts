@@ -29,9 +29,3 @@ export function togetherDeck(pack: PackId): TogetherCard[] {
 export function togetherPacks(): readonly Pack[] {
   return PACKS.filter((pack) => packAccess(pack) === 'open');
 }
-
-/** A saved place, clamped to the deck so a shorter pack or a bad value never points past the end. */
-export function resumeIndex(saved: unknown, deckLength: number): number {
-  if (typeof saved !== 'number' || !Number.isInteger(saved) || deckLength === 0) return 0;
-  return Math.min(Math.max(saved, 0), deckLength);
-}

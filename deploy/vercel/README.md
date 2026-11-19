@@ -36,7 +36,7 @@ it moves to the Oracle VM (or Vercel Pro). Neon's free plan has no such rule.
 
    | Variable | Value |
    |---|---|
-   | `DATABASE_URL` | Neon's **pooled** string, with `&connection_limit=5&connect_timeout=15` appended |
+   | `DATABASE_URL` | Neon's **pooled** string, with `&connection_limit=1&connect_timeout=15` appended |
    | `DATABASE_URL_UNPOOLED` | Neon's **direct** string |
    | `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` | optional nudges: run `npx web-push generate-vapid-keys` once and paste the pair. Never change it later (every phone would have to turn nudges on again) |
    | `VAPID_SUBJECT` | `mailto:<your contact address>` |

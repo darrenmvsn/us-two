@@ -1,10 +1,10 @@
 import { SiteFooter } from '@/components/SiteFooter';
 import { Wordmark } from '@/components/Wordmark';
-import { currentPlayer } from '@/lib/http/player-session';
+import { holdsPlayerCookie } from '@/lib/server/player-cookie';
 
 /** Together mode is open to anyone: no game, no cookie. A phone already in a game keeps its way home. */
 export default async function TogetherLayout({ children }: { children: React.ReactNode }) {
-  const inGame = Boolean(await currentPlayer());
+  const inGame = await holdsPlayerCookie();
   return (
     <>
       <header className="pt-[env(safe-area-inset-top)]">
