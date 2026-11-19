@@ -185,6 +185,8 @@ html {
 }
 
 body {
+  /* A slide-in starts 40px to the right; clip it so a phone never scrolls sideways. */
+  overflow-x: clip;
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);

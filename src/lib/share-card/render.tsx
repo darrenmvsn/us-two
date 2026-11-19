@@ -50,6 +50,7 @@ function Avatar({ name, colour, size = 120 }: { name: string; colour: string; si
       style={{
         width: size,
         height: size,
+        flexShrink: 0,
         borderRadius: size,
         background: colour,
         border: `8px solid ${C.background}`,
