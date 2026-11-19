@@ -17,6 +17,7 @@ describe('isPushServiceEndpoint', () => {
     ['a host ending in the name without a dot', 'https://notpush.apple.com.evil/x'],
     ['a prefix trick', 'https://evil-push.apple.com/x'],
     ['credentials before the host', 'https://fcm.googleapis.com@evil.example/x'],
+    ['credentials on the push host', 'https://user:pw@fcm.googleapis.com/x'],
     ['not a URL', 'fcm.googleapis.com/fcm/send/abc'],
     ['the empty string', ''],
   ])('refuses %s', (_, url) => expect(isPushServiceEndpoint(url)).toBe(false));

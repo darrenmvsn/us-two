@@ -19,17 +19,9 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 
-export type Tint = 'blush' | 'lilac' | 'butter' | 'mint' | 'peach' | 'sky';
+import type { Tint } from './tints';
 
-/** Tailwind classes per tint, written out whole so the compiler sees them. */
-export const TINT_BG: Record<Tint, string> = {
-  blush: 'bg-tint-blush',
-  lilac: 'bg-tint-lilac',
-  butter: 'bg-tint-butter',
-  mint: 'bg-tint-mint',
-  peach: 'bg-tint-peach',
-  sky: 'bg-tint-sky',
-};
+export { TINT_BG, type Tint } from './tints';
 
 export interface Theme {
   icon: LucideIcon;

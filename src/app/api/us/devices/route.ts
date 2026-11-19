@@ -3,11 +3,12 @@ import { deviceLinkForSchema, firstIssue } from '@/lib/couple/inputs';
 import { routeLimits } from '@/lib/http/limits';
 import { currentPlayer } from '@/lib/http/player-session';
 import { clientKey } from '@/lib/http/rate-limit';
-import { errorResponse, noContent, privateJson, rateLimited, readJson, signedOut } from '@/lib/http/responses';
+import { crossSiteRefused, errorResponse, isCrossSite, noContent, privateJson, rateLimited, readJson, signedOut } from '@/lib/http/responses';
 import { prisma } from '@/lib/prisma';
+import { guardRoute } from '@/lib/server/unexpected-error';
 
 /** A one-time link that signs another phone in: for you, or for your partner to get back in. */
-export async function POST(request: Request) {
+export const POST = guardRoute(async function POST(request: Request) {
   if (!routeLimits.play.allow(clientKey(request))) return rateLimited();
   const ctx = await currentPlayer();
   if (!ctx) return signedOut();
@@ -23,13 +24,14 @@ export async function POST(request: Request) {
     case 'no_partner':
       return errorResponse(409, 'no_partner', 'Your partner has not joined yet.');
   }
-}
+});
 
 /** Sign out every other phone playing as you. */
-export async function DELETE(request: Request) {
+export const DELETE = guardRoute(async function DELETE(request: Request) {
   if (!routeLimits.play.allow(clientKey(request))) return rateLimited();
+  if (isCrossSite(request)) return crossSiteRefused();
   const ctx = await currentPlayer();
   if (!ctx) return signedOut();
   await signOutOtherPhones(prisma, ctx);
   return noContent();
-}
+});

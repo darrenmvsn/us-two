@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { PACKS, questionsIn } from '@/lib/questions/packs';
 import { ME, PARTNER } from '@/lib/questions/types';
-import { resumeIndex, togetherCard, togetherDeck, togetherPacks } from './deck';
+import { togetherCard, togetherDeck, togetherPacks } from './deck';
+import { resumeIndex } from './place';
 
 describe('togetherCard', () => {
   it('keeps an open question as it is', () => {

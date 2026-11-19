@@ -322,9 +322,17 @@ a,
 }
 
 .btn-sm {
+  position: relative;
   height: 36px;
   padding: 0 14px;
   font-size: var(--text-caption);
+}
+
+/* Looks 36 px, takes a 44 px tap. */
+.btn-sm::after {
+  content: '';
+  position: absolute;
+  inset: -4px 0;
 }
 
 .btn-primary {

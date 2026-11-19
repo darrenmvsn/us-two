@@ -5,9 +5,10 @@ import { setPlayerCookie } from '@/lib/http/player-session';
 import { clientKey } from '@/lib/http/rate-limit';
 import { errorResponse, privateJson, rateLimited, readJson } from '@/lib/http/responses';
 import { prisma } from '@/lib/prisma';
+import { guardRoute } from '@/lib/server/unexpected-error';
 
 /** Start a game: this phone becomes the first player and gets the invite link. */
-export async function POST(request: Request) {
+export const POST = guardRoute(async function POST(request: Request) {
   if (!routeLimits.startCouple.allow(clientKey(request))) return rateLimited();
   const json = await readJson(request);
   if (!json.ok) return json.response;
@@ -17,4 +18,4 @@ export async function POST(request: Request) {
   const started = await startCouple(prisma, parsed.data);
   await setPlayerCookie(started.token);
   return privateJson({ started: true }, 201);
-}
+});

@@ -3,11 +3,12 @@
 import { ArrowLeft, ArrowRight, Heart, RotateCcw } from 'lucide-react';
 import Link from 'next/link';
 import { useCallback, useEffect } from 'react';
-import { TINT_BG, type Tint } from '@/components/art/themes';
+import { TINT_BG, type Tint } from '@/components/art/tints';
 import { tap } from '@/lib/client/haptics';
 import { useSwipe } from '@/lib/client/use-swipe';
 import { useTogetherPlace } from '@/lib/client/together-place';
-import { resumeIndex, type TogetherCard } from '@/lib/together/deck';
+import type { TogetherCard } from '@/lib/together/deck';
+import { resumeIndex } from '@/lib/together/place';
 
 /** One phone, both of you: read the card aloud, both answer, swipe on. */
 export function TogetherDeck({

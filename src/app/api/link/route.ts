@@ -5,9 +5,10 @@ import { currentPlayer, setPlayerCookie } from '@/lib/http/player-session';
 import { clientKey } from '@/lib/http/rate-limit';
 import { errorResponse, privateJson, rateLimited, readJson } from '@/lib/http/responses';
 import { prisma } from '@/lib/prisma';
+import { guardRoute } from '@/lib/server/unexpected-error';
 
 /** Sign this phone in with a one-time link from Settings. Works without a player, like joining. */
-export async function POST(request: Request) {
+export const POST = guardRoute(async function POST(request: Request) {
   if (!routeLimits.linkPhone.allow(clientKey(request))) return rateLimited();
   const json = await readJson(request);
   if (!json.ok) return json.response;
@@ -28,4 +29,4 @@ export async function POST(request: Request) {
     case 'not_found':
       return errorResponse(404, 'not_found', 'This link is not right. Make a new one in Settings.');
   }
-}
+});

@@ -5,9 +5,10 @@ import { currentPlayer } from '@/lib/http/player-session';
 import { clientKey } from '@/lib/http/rate-limit';
 import { errorResponse, noContent, rateLimited, readJson, signedOut } from '@/lib/http/responses';
 import { prisma } from '@/lib/prisma';
+import { guardRoute } from '@/lib/server/unexpected-error';
 
 /** Answer the current round. Answers are final. */
-export async function POST(request: Request) {
+export const POST = guardRoute(async function POST(request: Request) {
   if (!routeLimits.play.allow(clientKey(request))) return rateLimited();
   const ctx = await currentPlayer();
   if (!ctx) return signedOut();
@@ -30,4 +31,4 @@ export async function POST(request: Request) {
     case 'bad_option':
       return errorResponse(400, result.kind, 'That answer does not fit this question.');
   }
-}
+});
