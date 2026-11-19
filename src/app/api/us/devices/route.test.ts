@@ -82,6 +82,12 @@ describe('DELETE /api/us/devices', () => {
     expect(signOutOtherPhones).toHaveBeenCalledWith({}, player);
   });
 
+  it('refuses a request another site made', async () => {
+    const res = await DELETE(new Request('http://test/api/us/devices', { method: 'DELETE', headers: { 'sec-fetch-site': 'same-site', 'x-forwarded-for': '10.3.7.7' } }));
+    expect(res.status).toBe(403);
+    expect(signOutOtherPhones).not.toHaveBeenCalled();
+  });
+
   it('rate limits one address', async () => {
     const statuses: number[] = [];
     for (let i = 0; i < 61; i += 1) statuses.push((await DELETE(request('DELETE', undefined, 'application/json', '10.3.8.8'))).status);
